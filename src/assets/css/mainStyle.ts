@@ -1,0 +1,115 @@
+import {StyleSheet} from 'react-native';
+
+const styles = StyleSheet.create({
+  text: {
+    color: 'white',
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  mainContainer: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    backgroundColor: 'black',
+  },
+  screenDaysContainer: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 30,
+  },
+  screenDays: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  powerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 200,
+    width: '100%',
+    marginTop: 30,
+    position: 'relative',
+    left: -50,
+    top: -50,
+    transform: [{rotateY: '180deg'}],
+  },
+  screensContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    width: '100%',
+  },
+  mainDigits: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  digits: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mainButtons: {
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    width: '98%',
+    height: 200,
+    position: 'absolute',
+    bottom: 10,
+  },
+  colomunButtons: {
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    width: '100%',
+    height: 110,
+  },
+  rowButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+  },
+  main: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    height: 200,
+    marginTop: 10,
+  },
+  mainLeft: {
+    marginLeft: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    width: 100,
+    height: 200,
+  },
+  mainRight: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    width: '50%',
+    height: 200,
+  },
+  aside: {
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    height: 200,
+  },
+  collon: {
+    flexDirection: 'column',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    height: 50,
+    marginTop: 12,
+    width: 1,
+  },
+});
+
+export default styles;
