@@ -1,76 +1,90 @@
-import React, {useState} from 'react';
-import {
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  Animated,
-  PanResponder,
-} from 'react-native';
+import React, {useState, useRef, useEffect} from 'react';
+import {View, Text, PanResponder, StyleSheet} from 'react-native';
 
-interface RotaryButtonProps {
-  size: number;
-  onPress: (angle: number) => void;
-}
-
-const RotaryButton: React.FC<RotaryButtonProps> = ({size, onPress}) => {
-  const [angle, setAngle] = useState(0);
-  const pan = useState(new Animated.Value(0))[0];
+const Potentiometer = ({onValueChange}: any) => {
+  const [value, setValue] = useState(5);
+  const knobRef = useRef(null);
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onPanResponderMove: (event, gestureState) => {
-      const {dx, dy} = gestureState;
-      const newAngle = Math.atan2(dy, dx) * (180 / Math.PI); // Convertir en degrés
-      setAngle(newAngle);
-      Animated.event([null, {dx: pan}], {useNativeDriver: false})(
-        event,
-        gestureState,
+      // Calculer la nouvelle valeur en fonction de l'angle de rotation
+      const {moveX, moveY} = gestureState;
+      const knob: any = knobRef.current;
+      knob.measure(
+        (
+          x: any,
+          y: any,
+          width: number,
+          height: number,
+          pageX: number,
+          pageY: number,
+        ) => {
+          const centerX = pageX + width / 2;
+          const centerY = pageY + height / 2;
+          const angle =
+            Math.atan2(moveY - centerY, moveX - centerX) * (180 / Math.PI) + 75;
+          const invertedAngle = angle; // Inversion du sens de rotation
+          const newValue = Math.floor(invertedAngle / 20);
+          // Limiter la valeur entre 0 et 10
+          const clampedValue = Math.min(Math.max(newValue, 0), 10);
+          setValue(clampedValue);
+          if (onValueChange) {
+            onValueChange(clampedValue);
+          }
+        },
       );
-    },
-    onPanResponderRelease: (event, gestureState) => {
-      onPress(angle);
-      setAngle(0);
-      Animated.spring(pan, {toValue: 0, useNativeDriver: false}).start();
     },
   });
 
-  const rotateStyle = {
-    transform: [
-      {
-        rotate: pan.interpolate({
-          inputRange: [-180, 180],
-          outputRange: ['-180deg', '180deg'],
-        }),
-      },
-    ],
-  };
-
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={[styles.button, {width: size, height: size}]}
-        {...panResponder.panHandlers}>
-        <Animated.View style={[styles.knob, rotateStyle]} />
-      </TouchableOpacity>
+      <View style={styles.slider} {...panResponder.panHandlers}>
+        <View
+          ref={knobRef}
+          style={[styles.knob, {transform: [{rotate: `${value * 30}deg`}]}]}>
+          <View style={styles.mark} />
+        </View>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    top: 75,
+    left: 80,
+    transform: [{rotateY: '180deg'}, {rotate: '120deg'}],
   },
-  button: {
+  slider: {
+    width: 140,
+    height: 140,
+    borderRadius: 100,
+    backgroundColor: 'rgba(15, 15, 15, 1)',
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 10,
+    borderColor: 'rgba(30, 30, 30, 0.8)',
   },
   knob: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'gray',
+    width: 120,
+    height: 120,
+    borderRadius: 100,
+    backgroundColor: 'black',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mark: {
+    width: '100%',
+    height: 10,
+    backgroundColor: 'rgba(30, 30, 30, 0.8)',
+    position: 'absolute',
+    top: '50%',
+    transform: [{translateY: -5}],
   },
 });
 
-export default RotaryButton;
+export default Potentiometer;
