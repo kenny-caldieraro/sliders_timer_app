@@ -11,6 +11,10 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: 'black',
+    // borderColor: 'gray',
+    // borderLeftWidth: 2,
+    // borderRightWidth: 2,
+    // borderBottomWidth: 2,
   },
   screenDaysContainer: {
     flexDirection: 'column',
@@ -99,7 +103,7 @@ const styles = StyleSheet.create({
   aside: {
     flexDirection: 'column',
     justifyContent: 'space-around',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     height: 200,
   },
   collon: {
