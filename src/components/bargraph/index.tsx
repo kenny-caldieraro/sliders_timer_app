@@ -12,6 +12,7 @@ interface LEDBarGraphProps {
   ledHeight?: number;
   spacing?: number;
   rotate?: boolean;
+  state?: boolean;
 }
 
 const LEDBarGraph: React.FC<LEDBarGraphProps> = ({
@@ -25,6 +26,7 @@ const LEDBarGraph: React.FC<LEDBarGraphProps> = ({
   ledHeight = 13,
   spacing = 2,
   rotate = false,
+  state = false,
 }) => {
   const numEmptyLEDs = numLEDs - Math.floor((value / maxValue) * numLEDs);
 
@@ -40,7 +42,7 @@ const LEDBarGraph: React.FC<LEDBarGraphProps> = ({
       ]}>
       {Array.from({length: numLEDs}, (_, index) => {
         let isFilled;
-        if (index === 0 || index === 9) {
+        if ((index === 0 || index === 9) && state) {
           isFilled = true;
         } else {
           isFilled = index >= numEmptyLEDs;
