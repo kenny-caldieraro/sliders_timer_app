@@ -1,7 +1,19 @@
 import React from 'react';
-import {View, Text, Animated, StatusBar} from 'react-native';
+import {
+  View,
+  Text,
+  Animated,
+  StatusBar,
+  ScrollView,
+  Dimensions,
+} from 'react-native';
 import SevenSegmentDisplay from 'rn-seven-segment-display';
 import Sound from 'react-native-sound';
+
+const screenWidth = Dimensions.get('window').width;
+const screenHeight = Dimensions.get('window').height;
+
+const scale = (screenWidth / screenHeight) * 1.4;
 
 // sounds
 const slide = require('./src/assets/sounds/slide.mp3');
@@ -47,7 +59,7 @@ const App = () => {
   const [, setCounter] = React.useState(0);
   const [loopIntervalId, setLoopIntervalId] = React.useState(0);
   const [tempsRestant, setTempsRestant] = React.useState(0);
-  const [potentiometerValue, setPotentiometerValue] = React.useState(5);
+  // const [potentiometerValue, setPotentiometerValue] = React.useState(5);
   const [setupMode, setSetupMode] = React.useState(false);
   const [setupValue, setSetupValue] = React.useState(0);
   const [countdownIntervalId, setCountdownIntervalId] = React.useState(0);
@@ -192,10 +204,10 @@ const App = () => {
     }
   };
 
-  // callback potentiometer
-  const handlePotentiometerValueChange = (value: any) => {
-    setPotentiometerValue(value);
-  };
+  // // callback potentiometer
+  // const handlePotentiometerValueChange = (value: any) => {
+  //   setPotentiometerValue(value);
+  // };
 
   // select digit and genererValeursBooleennes it if countdown is off
   const selectDigit = () => {
@@ -307,7 +319,7 @@ const App = () => {
   }
 
   // test sound
-  if (tempsRestant === 20 || tempsRestant === 10 || tempsRestant === 5) {
+  if (tempsRestant <= 15) {
     if (countingDown) {
       bipSound.play().setVolume(0.2);
     }
@@ -322,6 +334,7 @@ const App = () => {
   const screenOffColor = 'rgba(60,0,0,1)';
 
   return (
+    // <ScrollView style={{backgroundColor: 'black'}}>
     <View style={styles.mainContainer}>
       <StatusBar hidden={true} />
       <Animated.View
@@ -384,19 +397,16 @@ const App = () => {
                 }
                 offColor={screenOffColor}
                 height={screenDaysHeight}
-                width={screenDaysWidth}
+                width={10}
+                // style={{transform: [{scale: scale}]}}
               />
             ))}
         </View>
       </View>
       {/* power zone */}
       <View style={styles.powerContainer}>
-        <Power
-          value={isActive ? potentiometerValue : 0}
-          maxValue={10}
-          numLEDs={10}
-        />
-        <Rotate onValueChange={handlePotentiometerValueChange} />
+        <Power value={isActive} maxValue={10} numLEDs={10} />
+        {/* <Rotate onValueChange={handlePotentiometerValueChange} /> */}
       </View>
       {/* screens zone */}
       <View style={styles.screensContainer}>
@@ -419,6 +429,7 @@ const App = () => {
                   offColor={screenOffColor}
                   height={screenHeight}
                   width={screenWidth}
+                  // style={{transform: [{scale: scale}]}}
                 />
               ))}
           </View>
@@ -452,6 +463,7 @@ const App = () => {
                   offColor={screenOffColor}
                   height={screenHeight}
                   width={screenWidth}
+                  // style={{transform: [{scale: scale}]}}
                 />
               ))}
           </View>
@@ -485,6 +497,7 @@ const App = () => {
                   offColor={screenOffColor}
                   height={screenHeight}
                   width={screenWidth}
+                  // style={{transform: [{scale: scale}]}}
                 />
               ))}
           </View>
@@ -523,6 +536,14 @@ const App = () => {
             numLEDs={10}
             state={isActive}
           />
+          <View style={{width: 10}}>
+            {Array(8)
+              .fill(0)
+              .map((_, i) => (
+                <Text style={{color: 'white', letterSpacing: -2}}>--</Text>
+              ))}
+          </View>
+
           <Bargraph
             value={isActive && countingDown && genererValeursBooleennes()[5]}
             maxValue={10}
@@ -583,6 +604,7 @@ const App = () => {
         </View>
       </View>
     </View>
+    // </ScrollView>
   );
 };
 
