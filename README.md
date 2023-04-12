@@ -1,12 +1,10 @@
-#### English
-
 # Slider Timer
 
 Slider Timer is a mobile application developed using React Native that replicates the iconic timer from the TV series Sliders. The application allows users to set a countdown time, start the timer, and visually track the progress.
 
 ### Slider Timer Screenshot
 
-![Slider Timer Screenshot](./snaps/Simulator%20Screen%20Shot%20-%20iPhone%2012%20-%202023-04-12%20at%2015.11.21.png)
+<img src="./snaps/Simulator%20Screen%20Shot%20-%20iPhone%2012%20-%202023-04-12%20at%2015.11.21.png"  width="60%" height="30%">
 
 ### Features
 
