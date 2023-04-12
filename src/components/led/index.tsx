@@ -12,14 +12,14 @@ const RectangularLed: React.FC<RectangularLedProps> = ({size, isOn, color}) => {
 
   switch (color) {
     case 'red':
-      ledColor = isOn ? 'rgba(255, 0, 0, 1)' : 'rgba(80, 0, 0, 1)';
+      ledColor = isOn ? 'rgba(255, 0, 0, 1)' : 'rgba(70, 0, 0, 1)';
       break;
     case 'yellow':
-      ledColor = isOn ? 'rgba(255, 255, 0, 1)' : 'rgba(80, 80, 0, 1)';
+      ledColor = isOn ? 'rgba(255, 255, 0, 1)' : 'rgba(70, 70, 0, 1)';
       break;
     case 'green':
     default:
-      ledColor = isOn ? 'rgba(0, 255, 0, 1)' : 'rgba(0, 80, 0, 1)';
+      ledColor = isOn ? 'rgba(0, 255, 0, 1)' : 'rgba(0, 70, 0, 1)';
       break;
   }
 

@@ -7,7 +7,7 @@ interface RoundLedProps {
 }
 
 const RoundLed: React.FC<RoundLedProps> = ({size, isOn}) => {
-  const ledColor = isOn ? 'rgba(255, 0, 0, 1)' : 'rgba(80, 0, 0, 1)';
+  const ledColor = isOn ? 'rgba(255, 0, 0, 1)' : 'rgba(70, 0, 0, 1)';
 
   return (
     <View
