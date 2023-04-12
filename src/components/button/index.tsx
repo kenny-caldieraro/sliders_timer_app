@@ -1,5 +1,10 @@
 import React from 'react';
-import {StyleSheet, TouchableOpacity, Text} from 'react-native';
+import {StyleSheet, TouchableOpacity, Text, Dimensions} from 'react-native';
+
+const screenWidth = Dimensions.get('window').width;
+const screenHeight = Dimensions.get('window').height;
+
+const scale = (screenWidth / screenHeight) * 1.4;
 
 const MyButton = ({...props}) => {
   return (
@@ -10,8 +15,8 @@ const MyButton = ({...props}) => {
       style={[
         styles.container,
         {
-          width: props.big ? 85 : 75,
-          height: props.big ? 50 : 45,
+          width: props.big ? 80 : 70,
+          height: props.big ? 45 : 40,
           alignItems: props.big ? 'flex-end' : 'center',
         },
       ]}>
@@ -36,6 +41,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     justifyContent: 'center',
+    // transform: [{scale: scale}],
   },
   text: {
     color: 'white',

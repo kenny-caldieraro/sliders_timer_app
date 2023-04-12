@@ -52,11 +52,13 @@ const Potentiometer = ({onValueChange}: any) => {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'absolute',
-    top: 75,
-    left: 80,
+    // position: 'absolute',
+    // top: 50,
+    // left: -5,
+    // width: 300,
+    // height: 300,
+    // backgroundColor: 'white',
+
     transform: [{rotateY: '180deg'}, {rotate: '120deg'}],
   },
   slider: {
