@@ -85,10 +85,10 @@ const styles = StyleSheet.create({
   main: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     width: '100%',
     height: 200,
-    marginTop: 10,
+    marginTop: 15,
   },
   mainLeft: {
     marginLeft: 10,
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     width: 100,
-    height: 200,
+    height: 130,
   },
   mainRight: {
     flexDirection: 'row',
