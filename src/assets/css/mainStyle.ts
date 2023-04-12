@@ -1,4 +1,9 @@
-import {StyleSheet} from 'react-native';
+import {StyleSheet, Platform, Dimensions} from 'react-native';
+
+const screenWidth = Dimensions.get('window').width;
+const screenHeight = Dimensions.get('window').height;
+
+const scale = (screenWidth / screenHeight) * (screenHeight > 800 ? 2 : 1.5);
 
 const styles = StyleSheet.create({
   text: {
@@ -8,19 +13,16 @@ const styles = StyleSheet.create({
   },
   mainContainer: {
     flex: 1,
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: 'black',
-    // borderColor: 'gray',
-    // borderLeftWidth: 2,
-    // borderRightWidth: 2,
-    // borderBottomWidth: 2,
+    height: 830,
   },
   screenDaysContainer: {
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 30,
+    marginTop: 15,
     zIndex: 1,
     width: '100%',
     backgroundColor: 'black',
@@ -36,19 +38,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    height: 200,
+    marginTop: 10,
+    marginBottom: 10,
+    height: 'auto',
     width: '100%',
-    marginTop: 30,
-    position: 'relative',
-    left: -50,
-    top: -50,
-    transform: [{rotateY: '180deg'}],
+    transform: [{rotateY: '180deg'}, {scale: scale}],
   },
   screensContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     width: '100%',
+    height: 'auto',
   },
   mainDigits: {
     flexDirection: 'column',
@@ -65,16 +66,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     width: '98%',
-    height: 200,
-    position: 'absolute',
-    bottom: 10,
+    height: 'auto',
+    marginTop: 0,
+    marginBottom: 15,
+    // position: 'absolute',
+    // bottom: 10,
+    // transform: [{scale: scale}],
   },
   colomunButtons: {
     flexDirection: 'column',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     alignItems: 'flex-start',
     width: '100%',
     height: 110,
+    marginBottom: 10,
   },
   rowButtons: {
     flexDirection: 'row',
@@ -85,24 +90,25 @@ const styles = StyleSheet.create({
   main: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    width: '100%',
-    height: 200,
-    marginTop: 15,
+    alignItems: Platform.OS === 'android' ? 'flex-start' : 'center',
+    width: screenWidth,
+    height: 160,
+    marginTop: 5,
+    // transform: [{scale: scale}],
   },
   mainLeft: {
     marginLeft: 10,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    width: 100,
+    width: screenWidth / 2.3,
     height: 130,
   },
   mainRight: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    width: '50%',
+    width: screenWidth / 2.2,
     height: 200,
   },
   aside: {
