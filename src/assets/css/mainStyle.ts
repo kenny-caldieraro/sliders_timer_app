@@ -21,6 +21,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 30,
+    zIndex: 1,
+    width: '100%',
+    backgroundColor: 'black',
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
   },
   screenDays: {
     flexDirection: 'row',
