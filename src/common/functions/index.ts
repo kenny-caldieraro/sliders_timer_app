@@ -1,5 +1,6 @@
 import React from 'react';
 import Sound from 'react-native-sound';
+import {Platform} from 'react-native';
 
 const bip = require('../../assets/sounds/bip.mp3');
 
@@ -30,14 +31,17 @@ const genererValeursBooleennes = () => {
       toggleValue = !toggleValue;
     }, 333);
 
-    intervalId2 = setInterval(() => {
-      if (count === 10) {
-        increment = -1;
-      } else if (count === 0) {
-        increment = 1;
-      }
-      count += increment;
-    }, 20);
+    intervalId2 = setInterval(
+      () => {
+        if (count === 10) {
+          increment = -1;
+        } else if (count === 0) {
+          increment = 1;
+        }
+        count += increment;
+      },
+      Platform.OS === 'ios' ? 20 : 100,
+    );
   }
 
   const valeur6: any = count;
