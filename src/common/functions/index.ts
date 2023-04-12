@@ -1,3 +1,15 @@
+import React from 'react';
+import Sound from 'react-native-sound';
+
+const bip = require('../../assets/sounds/bip.mp3');
+
+const bipSound = new Sound(bip, error => {
+  if (error) {
+    console.log('failed to load the sound', error);
+    return;
+  }
+});
+
 let toggleValue = false;
 let intervalId: any;
 let intervalId2: any;
@@ -81,48 +93,96 @@ const countingDownConverter = (temps: number, mode: string) => {
     switch (temps) {
       case 1:
         // genser
+        bipSound.play().setVolume(0.2);
         return {
           days: '000',
           hours: 'GE',
           minutes: 'n5',
           seconds: 'Er',
-          state: true,
         };
       case 2:
         // bug
+        bipSound.play().setVolume(0.2);
         return {
           days: '000',
           hours: 'Eu',
           minutes: 'r0',
           seconds: 'n0',
-          state: true,
         };
       case 3:
         // caluri
+        bipSound.play().setVolume(0.2);
         return {
           days: '000',
           hours: 'Ca',
           minutes: 'lu',
           seconds: 'ri',
-          state: true,
         };
       case 4:
         // bug
+        bipSound.play().setVolume(0.2);
         return {
           days: '000',
           hours: 'Eu',
           minutes: 'r0',
           seconds: 'n0',
-          state: true,
         };
       case 5:
+        // bug
+        bipSound.play().setVolume(0.2);
+        return {
+          days: '000',
+          hours: 'Eu',
+          minutes: 'r0',
+          seconds: 'n0',
+        };
+      case 6:
+        // caluri
+        bipSound.play().setVolume(0.2);
+        return {
+          days: '000',
+          hours: 'Ca',
+          minutes: 'lu',
+          seconds: 'ri',
+        };
+      case 7:
         // kenny
+        bipSound.play().setVolume(0.2);
         return {
           days: '000',
           hours: 'he',
           minutes: 'nn',
           seconds: 'Y-',
-          state: true,
+        };
+      case 8:
+        // clear
+        bipSound.play().setVolume(0.2);
+        return {
+          days: '000',
+          hours: '11',
+          minutes: '11',
+          seconds: '11',
+        };
+      case 9:
+        return {
+          days: '000',
+          hours: ' 1',
+          minutes: '11',
+          seconds: '1 ',
+        };
+      case 10:
+        return {
+          days: '000',
+          hours: '  ',
+          minutes: '11',
+          seconds: '  ',
+        };
+      case 11:
+        return {
+          days: '000',
+          hours: '  ',
+          minutes: '  ',
+          seconds: '  ',
         };
       default:
         return {
@@ -130,7 +190,44 @@ const countingDownConverter = (temps: number, mode: string) => {
           hours: '00',
           minutes: '00',
           seconds: '00',
-          state: false,
+        };
+    }
+  } else if (mode === 'clear') {
+    switch (temps) {
+      case 0:
+        return {
+          days: '000',
+          hours: '00',
+          minutes: '00',
+          seconds: '00',
+        };
+      case 1:
+        return {
+          days: ' 0 ',
+          hours: ' 0',
+          minutes: '00',
+          seconds: '0 ',
+        };
+      case 2:
+        return {
+          days: '   ',
+          hours: '  ',
+          minutes: '00',
+          seconds: '  ',
+        };
+      case 3:
+        return {
+          days: '   ',
+          hours: '  ',
+          minutes: '  ',
+          seconds: '  ',
+        };
+      default:
+        return {
+          days: '000',
+          hours: '00',
+          minutes: '00',
+          seconds: '00',
         };
     }
   } else {
@@ -139,7 +236,6 @@ const countingDownConverter = (temps: number, mode: string) => {
       hours: '00',
       minutes: '00',
       seconds: '00',
-      state: false,
     };
   }
 };
