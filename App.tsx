@@ -1,6 +1,25 @@
 import React from 'react';
-import {View, Text} from 'react-native';
+import {View, Text, Animated, StatusBar} from 'react-native';
 import SevenSegmentDisplay from 'rn-seven-segment-display';
+import Sound from 'react-native-sound';
+
+// sounds
+const slide = require('./src/assets/sounds/slide.mp3');
+const bip = require('./src/assets/sounds/bip.mp3');
+
+const bipSound = new Sound(bip, error => {
+  if (error) {
+    console.log('failed to load the sound', error);
+    return;
+  }
+});
+
+const slideSound = new Sound(slide, error => {
+  if (error) {
+    console.log('failed to load the sound', error);
+    return;
+  }
+});
 
 // Components
 import {
@@ -34,6 +53,18 @@ const App = () => {
   const [countdownIntervalId, setCountdownIntervalId] = React.useState(0);
   const [countingDown, setCountingDown] = React.useState(false);
   const [mode, setMode] = React.useState('init');
+  const [mute, setMute] = React.useState(false);
+  const [randomMode, setRandomMode] = React.useState(false);
+
+  const muteSound = () => {
+    if (mute) {
+      slideSound.setVolume(1);
+      bipSound.setVolume(1);
+    } else {
+      slideSound.setVolume(0);
+      bipSound.setVolume(0);
+    }
+  };
 
   React.useEffect(() => {
     startLoop();
@@ -57,7 +88,11 @@ const App = () => {
 
   // power toggle
   const powerToggle = () => {
+    if (!countingDown && tempsRestant > 0) {
+      return;
+    }
     setIsActive(!isActive);
+    bipSound.play().setVolume(0.1);
   };
 
   React.useEffect(() => {
@@ -68,14 +103,24 @@ const App = () => {
 
   // countdown
   const countDown = () => {
+    bipSound.play().setVolume(0.1);
     if (isActive) {
       if (tempsRestant > 0) {
         if (!setupMode) {
-          setCountingDown(true);
-          const intervalId = setInterval(() => {
-            setTempsRestant(tempsRestant => tempsRestant - 1);
-          }, 1000);
-          setCountdownIntervalId(intervalId);
+          if (countingDown && tempsRestant > 0) {
+            return;
+          }
+          startAnimation();
+          slideSound.play((success: any) => {
+            if (success) {
+              setCountingDown(true);
+              const intervalId = setInterval(() => {
+                bipSound.play().setVolume(0.2);
+                setTempsRestant(tempsRestant => tempsRestant - 1);
+              }, 1000);
+              setCountdownIntervalId(intervalId);
+            }
+          });
         } else {
           return () => {
             setTempsRestant(0);
@@ -89,7 +134,7 @@ const App = () => {
         const intervalId = setInterval(() => {
           setTempsRestant(tempsRestant => tempsRestant + 1);
           count++;
-          if (count > 5) {
+          if (count > 12) {
             setMode('countdown');
             setTempsRestant(0);
             clearInterval(intervalId);
@@ -104,6 +149,7 @@ const App = () => {
   const setTime = (mode: string) => {
     if (setupMode) {
       if (mode === 'add') {
+        bipSound.play().setVolume(0.1);
         switch (setupValue) {
           case 0:
             setTempsRestant(tempsRestant => tempsRestant + 1);
@@ -119,6 +165,7 @@ const App = () => {
             break;
         }
       } else if (mode === 'remove') {
+        bipSound.play().setVolume(0.1);
         switch (setupValue) {
           case 0:
             if (tempsRestant > 0) {
@@ -152,6 +199,7 @@ const App = () => {
 
   // select digit and genererValeursBooleennes it if countdown is off
   const selectDigit = () => {
+    bipSound.play().setVolume(0.1);
     if (isActive && !countingDown) {
       setSetupMode(true);
       if (setupMode && setupValue <= 3) {
@@ -174,12 +222,94 @@ const App = () => {
     }
   };
 
-  // end of countdown
-  if (tempsRestant <= 0) {
-    if (countingDown) {
+  // animation
+  const [, setBackgroundColor] = React.useState('black');
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  const startAnimation = () => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: false,
+    }).start(() => {
+      setBackgroundColor('white');
+      setTimeout(() => {
+        setBackgroundColor('black');
+      }, 3000);
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 1000,
+        delay: 2000,
+        useNativeDriver: false,
+      }).start();
+    });
+  };
+
+  const backgroundColorStyle = {
+    backgroundColor: fadeAnim.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['black', 'white'],
+    }),
+  };
+
+  // function random
+  const slideBeforeTime = () => {
+    const soundDelay = slideSound.getDuration();
+    if ((tempsRestant > 0 && countingDown) || random) {
+      startAnimation();
       setCountingDown(false);
       clearInterval(countdownIntervalId);
       setTempsRestant(0);
+      bipSound.stop();
+      slideSound.play((success: any) => {
+        if (success) {
+          setMode('init');
+          countDown();
+          setIsActive(false);
+          setIsActive(true);
+        }
+      });
+
+      setTimeout(() => {
+        random();
+        setRandomMode(true);
+      }, soundDelay * 1000 + 5000);
+    }
+  };
+
+  const random = () => {
+    setTempsRestant(Math.floor(Math.random() * 86400));
+    setCountingDown(true);
+    const intervalId = setInterval(() => {
+      bipSound.play().setVolume(0.2);
+      setTempsRestant(tempsRestant => tempsRestant - 1);
+    }, 1000);
+    setCountdownIntervalId(intervalId);
+  };
+
+  // end of countdown
+  if (tempsRestant <= 0) {
+    if (countingDown) {
+      startAnimation();
+      slideSound.play((success: any) => {
+        if (success) {
+          setMode('init');
+          countDown();
+          setIsActive(false);
+          setIsActive(true);
+        }
+      });
+      setCountingDown(false);
+      clearInterval(countdownIntervalId);
+      setTempsRestant(0);
+      bipSound.stop();
+    }
+  }
+
+  // test sound
+  if (tempsRestant === 20 || tempsRestant === 10 || tempsRestant === 5) {
+    if (countingDown) {
+      bipSound.play().setVolume(0.2);
     }
   }
 
@@ -189,17 +319,54 @@ const App = () => {
   const screenHeight = 7;
   const screenWidth = 20;
   const screenOnColor = 'red';
-  const screenOffColor = 'rgba(80,0,0,1)';
+  const screenOffColor = 'rgba(60,0,0,1)';
 
   return (
     <View style={styles.mainContainer}>
-      {/* <View
-        style={{
-          backgroundColor: 'white',
-          height: 10,
-          width: '100%',
-        }}
-      /> */}
+      <StatusBar hidden={true} />
+      <Animated.View
+        style={[
+          backgroundColorStyle,
+          {
+            height: 52,
+            width: '100%',
+            justifyContent: 'space-between',
+            alignItems: 'flex-end',
+            flexDirection: 'row',
+            position: 'absolute',
+            top: -20,
+          },
+        ]}
+      />
+      <Animated.View
+        style={[
+          backgroundColorStyle,
+          {
+            width: 40,
+            height: 40,
+            position: 'absolute',
+            top: 20,
+            left: 0,
+            borderBottomRightRadius: 20,
+            zIndex: 1,
+          },
+        ]}
+      />
+      <Animated.View
+        style={[
+          backgroundColorStyle,
+          {
+            width: 40,
+            height: 40,
+            position: 'absolute',
+            top: 20,
+            right: 0,
+            borderBottomLeftRadius: 20,
+            zIndex: 1,
+          },
+        ]}
+      />
+
       {/* header days */}
       <View style={styles.screenDaysContainer}>
         <Text style={styles.text}>DAYS</Text>
@@ -241,7 +408,7 @@ const App = () => {
               .map((digit, i) => (
                 <SevenSegmentDisplay
                   key={i}
-                  value={isActive ? digit : ' '}
+                  value={isActive ? digit : ''}
                   onColor={
                     setupMode &&
                     setupValue === 2 &&
@@ -398,12 +565,19 @@ const App = () => {
               selectDigit();
             }}
           />
-          <Button buttonName="NAME MENU" big={false} onPress={() => {}} />
+          <Button
+            buttonName="NAME MENU"
+            big={false}
+            onPress={() => {
+              // muteSound();
+            }}
+          />
           <Button
             buttonName="END"
             big={false}
             onPress={() => {
               countDown();
+              !randomMode && countingDown && slideBeforeTime();
             }}
           />
         </View>
