@@ -3,7 +3,7 @@ import {StyleSheet, Platform, Dimensions} from 'react-native';
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 
-const scale = (screenWidth / screenHeight) * (screenHeight > 800 ? 2 : 1.5);
+const scale = (screenWidth / screenHeight) * (screenHeight > 800 ? 2.2 : 1.5);
 
 const styles = StyleSheet.create({
   text: {
@@ -22,7 +22,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 15,
+    marginTop: 30,
     zIndex: 1,
     width: '100%',
     backgroundColor: 'black',
