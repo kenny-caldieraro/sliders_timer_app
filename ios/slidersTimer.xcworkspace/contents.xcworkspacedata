@@ -2,7 +2,7 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:slidersTimer.xcodeproj">
+      location = "group:/Users/kenny/Documents/slidersTimer/ios/slidersTimer.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:Pods/Pods.xcodeproj">
