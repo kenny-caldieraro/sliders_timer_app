@@ -327,9 +327,9 @@ const App = () => {
 
   // styles
   const screenDaysHeight = 5;
-  const screenDaysWidth = 10;
+  const screenDaysWidth = 12;
   const screenHeight = 7;
-  const screenWidth = 20;
+  const screenWidth = 18;
   const screenOnColor = 'red';
   const screenOffColor = 'rgba(60,0,0,1)';
 
@@ -397,7 +397,7 @@ const App = () => {
                 }
                 offColor={screenOffColor}
                 height={screenDaysHeight}
-                width={10}
+                width={screenDaysWidth}
                 // style={{transform: [{scale: scale}]}}
               />
             ))}
@@ -540,7 +540,9 @@ const App = () => {
             {Array(8)
               .fill(0)
               .map((_, i) => (
-                <Text style={{color: 'white', letterSpacing: -2}}>--</Text>
+                <Text key={i} style={{color: 'white', letterSpacing: -2}}>
+                  --
+                </Text>
               ))}
           </View>
 
