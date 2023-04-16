@@ -1,5 +1,5 @@
-import React, {useState, useRef, useEffect} from 'react';
-import {View, Text, PanResponder, StyleSheet} from 'react-native';
+import React, {useState, useRef} from 'react';
+import {View, PanResponder, StyleSheet} from 'react-native';
 
 const Potentiometer = ({onValueChange}: any) => {
   const [value, setValue] = useState(5);
@@ -52,13 +52,6 @@ const Potentiometer = ({onValueChange}: any) => {
 
 const styles = StyleSheet.create({
   container: {
-    // position: 'absolute',
-    // top: 50,
-    // left: -5,
-    // width: 300,
-    // height: 300,
-    // backgroundColor: 'white',
-
     transform: [{rotateY: '180deg'}, {rotate: '120deg'}],
   },
   slider: {

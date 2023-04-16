@@ -1,19 +1,7 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  Animated,
-  StatusBar,
-  ScrollView,
-  Dimensions,
-} from 'react-native';
+import {View, Text, Animated, StatusBar} from 'react-native';
 import SevenSegmentDisplay from 'rn-seven-segment-display';
 import Sound from 'react-native-sound';
-
-const screenWidth = Dimensions.get('window').width;
-const screenHeight = Dimensions.get('window').height;
-
-const scale = (screenWidth / screenHeight) * 1.4;
 
 // sounds
 const slide = require('./src/assets/sounds/slide.mp3');
@@ -34,14 +22,7 @@ const slideSound = new Sound(slide, error => {
 });
 
 // Components
-import {
-  Button,
-  Bargraph,
-  Power,
-  Rotate,
-  Led,
-  LedRound,
-} from './src/components/index';
+import {Button, Bargraph, Power, Led, LedRound} from './src/components/index';
 
 // styles
 import styles from './src/assets/css/mainStyle';
@@ -52,31 +33,17 @@ import {
   countingDownConverter,
 } from './src/common/functions/index';
 
-// data
-
 const App = () => {
   const [isActive, setIsActive] = React.useState(false);
   const [, setCounter] = React.useState(0);
   const [loopIntervalId, setLoopIntervalId] = React.useState(0);
   const [tempsRestant, setTempsRestant] = React.useState(0);
-  // const [potentiometerValue, setPotentiometerValue] = React.useState(5);
   const [setupMode, setSetupMode] = React.useState(false);
   const [setupValue, setSetupValue] = React.useState(0);
   const [countdownIntervalId, setCountdownIntervalId] = React.useState(0);
   const [countingDown, setCountingDown] = React.useState(false);
   const [mode, setMode] = React.useState('init');
-  const [mute, setMute] = React.useState(false);
   const [randomMode, setRandomMode] = React.useState(false);
-
-  const muteSound = () => {
-    if (mute) {
-      slideSound.setVolume(1);
-      bipSound.setVolume(1);
-    } else {
-      slideSound.setVolume(0);
-      bipSound.setVolume(0);
-    }
-  };
 
   React.useEffect(() => {
     startLoop();
@@ -204,12 +171,7 @@ const App = () => {
     }
   };
 
-  // // callback potentiometer
-  // const handlePotentiometerValueChange = (value: any) => {
-  //   setPotentiometerValue(value);
-  // };
-
-  // select digit and genererValeursBooleennes it if countdown is off
+  // set setup mode
   const selectDigit = () => {
     bipSound.play().setVolume(0.1);
     if (isActive && !countingDown) {
@@ -334,7 +296,6 @@ const App = () => {
   const screenOffColor = 'rgba(60,0,0,1)';
 
   return (
-    // <ScrollView style={{backgroundColor: 'black'}}>
     <View style={styles.mainContainer}>
       <StatusBar hidden={true} />
       <Animated.View
@@ -398,7 +359,6 @@ const App = () => {
                 offColor={screenOffColor}
                 height={screenDaysHeight}
                 width={screenDaysWidth}
-                // style={{transform: [{scale: scale}]}}
               />
             ))}
         </View>
@@ -406,7 +366,6 @@ const App = () => {
       {/* power zone */}
       <View style={styles.powerContainer}>
         <Power value={isActive} maxValue={10} numLEDs={10} />
-        {/* <Rotate onValueChange={handlePotentiometerValueChange} /> */}
       </View>
       {/* screens zone */}
       <View style={styles.screensContainer}>
@@ -429,7 +388,6 @@ const App = () => {
                   offColor={screenOffColor}
                   height={screenHeight}
                   width={screenWidth}
-                  // style={{transform: [{scale: scale}]}}
                 />
               ))}
           </View>
@@ -463,7 +421,6 @@ const App = () => {
                   offColor={screenOffColor}
                   height={screenHeight}
                   width={screenWidth}
-                  // style={{transform: [{scale: scale}]}}
                 />
               ))}
           </View>
@@ -497,7 +454,6 @@ const App = () => {
                   offColor={screenOffColor}
                   height={screenHeight}
                   width={screenWidth}
-                  // style={{transform: [{scale: scale}]}}
                 />
               ))}
           </View>
@@ -536,8 +492,8 @@ const App = () => {
             numLEDs={10}
             state={isActive}
           />
-          <View style={{width: 10}}>
-            {Array(8)
+          <View style={{width: 10, height: 'auto'}}>
+            {Array(9)
               .fill(0)
               .map((_, i) => (
                 <Text key={i} style={{color: 'white', letterSpacing: -2}}>
@@ -545,7 +501,6 @@ const App = () => {
                 </Text>
               ))}
           </View>
-
           <Bargraph
             value={isActive && countingDown && genererValeursBooleennes()[5]}
             maxValue={10}
@@ -589,11 +544,12 @@ const App = () => {
             }}
           />
           <Button
-            buttonName="NAME MENU"
+            buttonName="
+          NAME 
+          MENU
+          "
             big={false}
-            onPress={() => {
-              // muteSound();
-            }}
+            onPress={() => {}}
           />
           <Button
             buttonName="END"
@@ -606,7 +562,6 @@ const App = () => {
         </View>
       </View>
     </View>
-    // </ScrollView>
   );
 };
 
