@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, ViewStyle, StyleSheet} from 'react-native';
+import {View, StyleSheet} from 'react-native';
 
 import {Rotate} from '../index';
 interface LEDBarGraphProps {
@@ -72,9 +72,7 @@ const LEDBarGraph: React.FC<LEDBarGraphProps> = ({
           return <View style={[styles.led, ledStyle]} key={index} />;
         })}
       </View>
-      {/* <View style={{}}> */}
       <Rotate onValueChange={handlePotentiometerValueChange} />
-      {/* </View> */}
     </View>
   );
 };

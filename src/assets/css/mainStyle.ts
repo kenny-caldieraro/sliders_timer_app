@@ -69,9 +69,6 @@ const styles = StyleSheet.create({
     height: 'auto',
     marginTop: 0,
     marginBottom: 15,
-    // position: 'absolute',
-    // bottom: 10,
-    // transform: [{scale: scale}],
   },
   colomunButtons: {
     flexDirection: 'column',
@@ -94,7 +91,6 @@ const styles = StyleSheet.create({
     width: screenWidth,
     height: 160,
     marginTop: 5,
-    // transform: [{scale: scale}],
   },
   mainLeft: {
     marginLeft: 10,
