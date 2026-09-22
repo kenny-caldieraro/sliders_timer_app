@@ -1,13 +1,19 @@
 import type { ExpoConfig } from 'expo/config';
 
 /**
- * ATTENTION : `android.package` doit rester `com.sliderstimer`.
- * C'est l'identifiant de la fiche Play existante — le changer créerait
- * une nouvelle app au lieu de mettre à jour celle qui a été retirée.
+ * ATTENTION : ces deux identifiants ne doivent pas changer.
+ *
+ * Ils désignent les fiches existantes sur chaque magasin. En changer un
+ * créerait une nouvelle application au lieu de mettre à jour celle qui est
+ * déjà publiée — et sur Play, la fiche retirée resterait retirée.
+ *
+ * Ils sont différents l'un de l'autre, ce qui est parfaitement normal :
+ * chaque magasin a son propre espace de noms.
  *
  * `versionCode` doit être strictement supérieur au dernier publié (4).
  */
 const ANDROID_PACKAGE = 'com.sliderstimer';
+const IOS_BUNDLE_ID = 'com.webplayground.slidersreplica';
 const VERSION = '2.0.0';
 const ANDROID_VERSION_CODE = 5;
 
@@ -24,10 +30,7 @@ const config: ExpoConfig = {
   assetBundlePatterns: ['**/*'],
 
   ios: {
-    // L'ancien projet utilisait le bundle id par défaut de React Native
-    // (org.reactjs.native.example.*), qui n'est pas publiable sur l'App Store.
-    // L'app n'a donc jamais été publiée côté iOS : on part sur un id propre.
-    bundleIdentifier: ANDROID_PACKAGE,
+    bundleIdentifier: IOS_BUNDLE_ID,
     buildNumber: String(ANDROID_VERSION_CODE),
     supportsTablet: false,
     infoPlist: {

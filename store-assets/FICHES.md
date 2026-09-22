@@ -168,6 +168,27 @@ Réécriture complète de l'application.
 
 ---
 
+## Identifiants des fiches existantes
+
+À ne jamais changer : en changer un créerait une nouvelle application au lieu
+de mettre à jour celle qui est publiée. Ils diffèrent d'un magasin à l'autre,
+ce qui est normal — chaque magasin a son propre espace de noms.
+
+| Magasin | Identifiant | Version |
+|---|---|---|
+| Google Play | `com.sliderstimer` | 2.0.0, versionCode 5 (dernier publié : 4) |
+| App Store | `com.webplayground.slidersreplica` | 2.0.0, build 5 (dernier publié : 1.1) |
+
+## Visuels fournis
+
+| Fichier | Format | Pour |
+|---|---|---|
+| `icones/app-store-1024.png` | 1024 × 1024, sans alpha | Icône App Store. Apple refuse la transparence et les coins arrondis. |
+| `icones/google-play-512.png` | 512 × 512 | Icône Play. |
+| `banniere/google-play-1024x500.png` | 1024 × 500, sans alpha | Image mise en avant de la fiche Play. Play la recadre selon les emplacements : rien d'essentiel n'est placé près des bords. |
+| `app-store-6.9/` | 1320 × 2868 | Quatre captures App Store. |
+| `google-play-phone/` | 1434 × 2868 | Les mêmes, complétées en noir jusqu'à 2:1. |
+
 ## À remplir vous-même
 
 Ces champs dépendent de votre compte et ne peuvent pas être rédigés d'avance.
