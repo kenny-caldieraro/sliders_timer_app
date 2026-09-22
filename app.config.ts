@@ -126,6 +126,15 @@ const config: ExpoConfig = {
   experiments: {
     typedRoutes: false,
   },
+
+  // Compte et projet EAS. `eas init` ne peut pas écrire dans une config
+  // dynamique : ces valeurs sont donc posées à la main.
+  owner: 'webplayground',
+  extra: {
+    eas: {
+      projectId: '762e9a20-89ad-48bb-8268-23d02b7b808d',
+    },
+  },
 };
 
 export default config;
