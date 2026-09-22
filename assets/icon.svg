@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <linearGradient id="arc" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff9a76"/>
+      <stop offset="0.42" stop-color="#ff2020"/>
+      <stop offset="1" stop-color="#7d0a0a"/>
+    </linearGradient>
+    <radialGradient id="bg" cx="50%" cy="42%" r="72%">
+      <stop offset="0" stop-color="#15151a"/>
+      <stop offset="1" stop-color="#000000"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <g transform="translate(35.375,102.865) scale(0.93091)">
+    <path d="M 233.5 707 A 340 340 0 1 1 790.5 707" fill="none" stroke="#ff2020" stroke-opacity="0.14" stroke-width="200" stroke-linecap="round"/>
+    <path d="M 233.5 707 A 340 340 0 1 1 790.5 707" fill="none" stroke="#ff2020" stroke-opacity="0.24" stroke-width="130" stroke-linecap="round"/>
+    <path d="M 233.5 707 A 340 340 0 1 1 790.5 707" fill="none" stroke="url(#arc)" stroke-width="82" stroke-linecap="round"/>
+    <circle cx="512" cy="512" r="238" fill="#070707"/>
+    <circle cx="512" cy="410" r="82" fill="#ff2020" fill-opacity="0.22"/>
+    <circle cx="512" cy="614" r="82" fill="#ff2020" fill-opacity="0.22"/>
+    <circle cx="512" cy="410" r="52" fill="#ff2020"/>
+    <circle cx="512" cy="614" r="52" fill="#ff2020"/>
+  </g>
+</svg>

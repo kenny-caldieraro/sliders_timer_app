@@ -52,31 +52,39 @@ export default function App() {
   // chaque taille est donc plafonnée par la hauteur, pas seulement par la
   // largeur, sinon le bloc déborde sur un écran court.
   /*
-   * Proportions relevées sur l'objet réel :
-   *   - les six afficheurs horaires occupent la largeur presque bord à bord ;
-   *   - les afficheurs de jours font environ 70 % de leur hauteur ;
-   *   - la molette est petite, à peu près un tiers de la largeur ;
-   *   - l'ensemble est dense, pas étalé sur la hauteur.
+   * Proportions mesurées sur la façade, pas estimées à l'œil.
    *
-   * La taille des chiffres se déduit donc du contenu — un afficheur est
-   * 0,62 fois plus large que haut, six d'affilée plus deux séparateurs —
-   * et non d'une fraction arbitraire de l'écran.
+   * Rapports relevés, en prenant la bande horaire comme unité :
+   *   molette          0,47 fois la largeur de l'écran
+   *   chiffres         six afficheurs + deux séparateurs sur 83 % de la largeur
+   *   bande horaire    1,13 fois la hauteur d'un afficheur
+   *   bloc témoins     1,6 fois la hauteur de la bande
+   *   afficheur jours  0,45 fois la hauteur d'un afficheur horaire
+   *
+   * Un afficheur sept segments est 0,622 fois plus large que haut ; six
+   * d'affilée plus deux séparateurs font donc 4,09 fois cette hauteur.
    */
   const DIGIT_RATIO = 0.622;
-  const timeDigit = Math.min((width * 0.92) / (6 * DIGIT_RATIO + 0.34), height * 0.105);
-  const dayDigit = timeDigit * 0.7;
-  const dialSize = Math.min(width * 0.33, height * 0.148);
-  const bandHeight = timeDigit * 1.2;
-  // Le bandeau du vortex coiffe l'écran, hors du flux : il ne vole aucune
-  // place aux afficheurs.
+  const ROW_RATIO = 6 * DIGIT_RATIO + 0.36;
+  const timeDigit = Math.min((width * 0.83) / ROW_RATIO, height * 0.095);
+  const dayDigit = timeDigit * 0.45;
+  const dialSize = Math.min(width * 0.45, height * 0.205);
+  const bandHeight = timeDigit * 1.13;
+
   const portalHeight = Math.max(height * 0.07, 54);
 
-  // Hauteur des bargraphes, calculée ici pour que l'échelle gravée et la
-  // rangée entière s'y accordent. Une hauteur en pourcentage créerait une
-  // dépendance circulaire avec le parent, que yoga résout en gonflant le bloc.
-  const barSegment = 8;
-  const barGap = 4;
-  const barHeight = 8 * (barSegment + barGap) - barGap + 8;
+  /*
+   * Le bloc des témoins fait une fois et demie la hauteur de la bande
+   * horaire. On en déduit la taille d'un segment de bargraphe, plutôt que de
+   * fixer le segment et de subir la hauteur qui en résulte.
+   *
+   * Cette hauteur est calculée ici, et non en pourcentage dans la feuille de
+   * style : un pourcentage créerait une dépendance circulaire avec le parent,
+   * que yoga résout en gonflant la rangée jusqu'à recouvrir le pavé.
+   */
+  const barHeight = bandHeight * 1.45;
+  const barGap = 5;
+  const barSegment = Math.max((barHeight - 8 - 7 * barGap) / 8, 6);
 
   const isOn = state.phase !== 'off';
   const label = isOn ? formatSpoken(state.remainingMs) : 'Minuteur éteint';
@@ -155,7 +163,7 @@ export default function App() {
 
               {/* Témoins et bargraphes, à même la façade */}
               <View style={[styles.middle, { height: barHeight }]}>
-                <View style={styles.statusColumn}>
+                <View style={[styles.statusColumn, { height: barHeight - 12 }]}>
                   {STATUS_LEDS.map((led) => (
                     <StatusLed
                       key={led.label}
@@ -243,7 +251,12 @@ export default function App() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: COLORS.background },
   safe: { flex: 1 },
-  topBar: { paddingHorizontal: 16, paddingTop: 2, alignItems: 'flex-start' },
+  topBar: {
+    paddingHorizontal: 16,
+    paddingTop: 2,
+    paddingBottom: 10,
+    alignItems: 'flex-start',
+  },
   helpButton: {
     width: 32,
     height: 32,
@@ -263,7 +276,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 14,
+    gap: 8,
   },
   row: { flexDirection: 'row', alignItems: 'center' },
   caption: {
@@ -289,16 +302,16 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 18,
   },
-  statusColumn: { justifyContent: 'space-between', gap: 14 },
+  statusColumn: { justifyContent: 'space-between' },
   bargraphs: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   ladder: { alignItems: 'center', justifyContent: 'space-between' },
   rung: { width: 11, height: 2, borderRadius: 1, backgroundColor: COLORS.ladder },
-  pad: { width: '100%', gap: 10, paddingHorizontal: 12, paddingBottom: 6 },
+  pad: { width: '100%', gap: 8, paddingHorizontal: 12, paddingBottom: 4 },
   // Le pavé 1 / 4 est sur une platine rapportée, légèrement plus claire.
   keypadPanel: {
     alignSelf: 'flex-start',
-    gap: 8,
-    padding: 8,
+    gap: 6,
+    padding: 6,
     borderRadius: 10,
     backgroundColor: COLORS.keypadPanel,
     borderWidth: StyleSheet.hairlineWidth,

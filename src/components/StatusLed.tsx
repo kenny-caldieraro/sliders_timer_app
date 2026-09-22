@@ -25,7 +25,7 @@ function StatusLedView({ label, column, color, width }: StatusLedProps) {
           styles.led,
           {
             width,
-            height: width / 2.6,
+            height: width / 2.4,
             backgroundColor: on ? palette.on : palette.off,
           },
         ]}
