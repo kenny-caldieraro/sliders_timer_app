@@ -1,0 +1,36 @@
+name: Build de publication
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Plateforme à construire
+        required: true
+        default: android
+        type: choice
+        options: [android, ios, all]
+
+jobs:
+  build:
+    name: EAS Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          # Jeton à créer dans expo.dev puis à enregistrer dans les secrets
+          # du dépôt. Aucune clé de signature ne transite par ici : EAS
+          # Credentials détient le keystore.
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - run: npm ci
+
+      - name: Construire
+        run: eas build --platform ${{ inputs.platform }} --profile production --non-interactive --no-wait

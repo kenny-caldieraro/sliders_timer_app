@@ -1,568 +1,196 @@
-import React from 'react';
-import {View, Text, Animated, StatusBar} from 'react-native';
-import SevenSegmentDisplay from 'rn-seven-segment-display';
-import Sound from 'react-native-sound';
+import { StatusBar } from 'expo-status-bar';
+import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
-// sounds
-const slide = require('./src/assets/sounds/slide.mp3');
-const bip = require('./src/assets/sounds/bip.mp3');
-
-const bipSound = new Sound(bip, error => {
-  if (error) {
-    console.log('failed to load the sound', error);
-    return;
-  }
-});
-
-const slideSound = new Sound(slide, error => {
-  if (error) {
-    console.log('failed to load the sound', error);
-    return;
-  }
-});
-
-// Components
-import {Button, Bargraph, Power, Led, LedRound} from './src/components/index';
-
-// styles
-import styles from './src/assets/css/mainStyle';
-
-// function
+import { BarGraph } from './src/components/BarGraph';
+import { Colon } from './src/components/Colon';
+import { Digit } from './src/components/Digit';
+import { PadButton } from './src/components/PadButton';
+import { PowerDial } from './src/components/PowerDial';
+import { StatusLed } from './src/components/StatusLed';
 import {
-  genererValeursBooleennes,
-  countingDownConverter,
-} from './src/common/functions/index';
+  BARGRAPH_LEFT,
+  BARGRAPH_RIGHT,
+  DAY_DIGITS,
+  HOURS,
+  MINUTES,
+  SECONDS,
+  STATUS_LEDS,
+} from './src/hardware/layout';
+import { COLORS } from './src/theme';
+import { formatSpoken } from './src/timer/format';
+import { useTimer } from './src/timer/useTimer';
 
-const App = () => {
-  const [isActive, setIsActive] = React.useState(false);
-  const [, setCounter] = React.useState(0);
-  const [loopIntervalId, setLoopIntervalId] = React.useState(0);
-  const [tempsRestant, setTempsRestant] = React.useState(0);
-  const [setupMode, setSetupMode] = React.useState(false);
-  const [setupValue, setSetupValue] = React.useState(0);
-  const [countdownIntervalId, setCountdownIntervalId] = React.useState(0);
-  const [countingDown, setCountingDown] = React.useState(false);
-  const [mode, setMode] = React.useState('init');
-  const [randomMode, setRandomMode] = React.useState(false);
+/**
+ * Façade du minuteur.
+ *
+ * Ce composant ne se re-rend que lorsque la phase change. Les afficheurs, les
+ * témoins et les bargraphes sont abonnés individuellement aux lignes des
+ * matrices, donc une animation à soixante images par seconde ne le traverse
+ * jamais.
+ */
+export default function App() {
+  const { width, height } = useWindowDimensions();
+  const { state, actions } = useTimer();
 
-  React.useEffect(() => {
-    startLoop();
-    return () => {
-      stopLoop();
-    };
-  }, []);
+  // Toutes les tailles dérivent de la largeur : l'interface tient aussi bien
+  // sur un petit écran que sur une tablette, sans hauteur codée en dur.
+  const timeDigit = Math.min(width * 0.185, height * 0.1);
+  const dayDigit = timeDigit * 0.5;
+  const dialSize = Math.min(width * 0.44, height * 0.19);
 
-  // master void loop
-  const startLoop = () => {
-    setCounter(0);
-    const intervalId = setInterval(() => {
-      setCounter(counter => counter + 1);
-    }, 20);
-    setLoopIntervalId(intervalId);
-  };
-
-  const stopLoop = () => {
-    clearInterval(loopIntervalId);
-  };
-
-  // power toggle
-  const powerToggle = () => {
-    if (!countingDown && tempsRestant > 0) {
-      return;
-    }
-    setIsActive(!isActive);
-    bipSound.play().setVolume(0.1);
-  };
-
-  React.useEffect(() => {
-    if (isActive) {
-      countDown();
-    }
-  }, [isActive]);
-
-  // countdown
-  const countDown = () => {
-    bipSound.play().setVolume(0.1);
-    if (isActive) {
-      if (tempsRestant > 0) {
-        if (!setupMode) {
-          if (countingDown && tempsRestant > 0) {
-            return;
-          }
-          startAnimation();
-          slideSound.play((success: any) => {
-            if (success) {
-              setCountingDown(true);
-              const intervalId = setInterval(() => {
-                bipSound.play().setVolume(0.2);
-                setTempsRestant(tempsRestant => tempsRestant - 1);
-              }, 1000);
-              setCountdownIntervalId(intervalId);
-            }
-          });
-        } else {
-          return () => {
-            setTempsRestant(0);
-            clearInterval(countdownIntervalId);
-            setCountingDown(false);
-          };
-        }
-        // init mode
-      } else if (mode === 'init') {
-        let count = 0;
-        const intervalId = setInterval(() => {
-          setTempsRestant(tempsRestant => tempsRestant + 1);
-          count++;
-          if (count > 12) {
-            setMode('countdown');
-            setTempsRestant(0);
-            clearInterval(intervalId);
-          }
-        }, 300);
-        setCountdownIntervalId(intervalId);
-      }
-    }
-  };
-
-  // set timer
-  const setTime = (mode: string) => {
-    if (setupMode) {
-      if (mode === 'add') {
-        bipSound.play().setVolume(0.1);
-        switch (setupValue) {
-          case 0:
-            setTempsRestant(tempsRestant => tempsRestant + 1);
-            break;
-          case 1:
-            setTempsRestant(tempsRestant => tempsRestant + 60);
-            break;
-          case 2:
-            setTempsRestant(tempsRestant => tempsRestant + 3600);
-            break;
-          case 3:
-            setTempsRestant(tempsRestant => tempsRestant + 86400);
-            break;
-        }
-      } else if (mode === 'remove') {
-        bipSound.play().setVolume(0.1);
-        switch (setupValue) {
-          case 0:
-            if (tempsRestant > 0) {
-              setTempsRestant(tempsRestant => tempsRestant - 1);
-              break;
-            }
-          case 1:
-            if (tempsRestant > 60) {
-              setTempsRestant(tempsRestant => tempsRestant - 60);
-              break;
-            }
-          case 2:
-            if (tempsRestant > 3600) {
-              setTempsRestant(tempsRestant => tempsRestant - 3600);
-              break;
-            }
-          case 3:
-            if (tempsRestant > 86400) {
-              setTempsRestant(tempsRestant => tempsRestant - 86400);
-              break;
-            }
-        }
-      }
-    }
-  };
-
-  // set setup mode
-  const selectDigit = () => {
-    bipSound.play().setVolume(0.1);
-    if (isActive && !countingDown) {
-      setSetupMode(true);
-      if (setupMode && setupValue <= 3) {
-        switch (setupValue) {
-          case 0:
-            setSetupValue(1);
-            break;
-          case 1:
-            setSetupValue(2);
-            break;
-          case 2:
-            setSetupValue(3);
-            break;
-          case 3:
-            setSetupValue(0);
-            setSetupMode(false);
-            break;
-        }
-      }
-    }
-  };
-
-  // animation
-  const [, setBackgroundColor] = React.useState('black');
-  const fadeAnim = React.useRef(new Animated.Value(0)).current;
-
-  const startAnimation = () => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 1000,
-      useNativeDriver: false,
-    }).start(() => {
-      setBackgroundColor('white');
-      setTimeout(() => {
-        setBackgroundColor('black');
-      }, 3000);
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 1000,
-        delay: 2000,
-        useNativeDriver: false,
-      }).start();
-    });
-  };
-
-  const backgroundColorStyle = {
-    backgroundColor: fadeAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['black', 'white'],
-    }),
-  };
-
-  // function random
-  const slideBeforeTime = () => {
-    const soundDelay = slideSound.getDuration();
-    if ((tempsRestant > 0 && countingDown) || random) {
-      startAnimation();
-      setCountingDown(false);
-      clearInterval(countdownIntervalId);
-      setTempsRestant(0);
-      bipSound.stop();
-      slideSound.play((success: any) => {
-        if (success) {
-          setMode('init');
-          countDown();
-          setIsActive(false);
-          setIsActive(true);
-        }
-      });
-
-      setTimeout(() => {
-        random();
-        setRandomMode(true);
-      }, soundDelay * 1000 + 5000);
-    }
-  };
-
-  const random = () => {
-    setTempsRestant(Math.floor(Math.random() * 86400));
-    setCountingDown(true);
-    const intervalId = setInterval(() => {
-      bipSound.play().setVolume(0.2);
-      setTempsRestant(tempsRestant => tempsRestant - 1);
-    }, 1000);
-    setCountdownIntervalId(intervalId);
-  };
-
-  // end of countdown
-  if (tempsRestant <= 0) {
-    if (countingDown) {
-      startAnimation();
-      slideSound.play((success: any) => {
-        if (success) {
-          setMode('init');
-          countDown();
-          setIsActive(false);
-          setIsActive(true);
-        }
-      });
-      setCountingDown(false);
-      clearInterval(countdownIntervalId);
-      setTempsRestant(0);
-      bipSound.stop();
-    }
-  }
-
-  // test sound
-  if (tempsRestant <= 15) {
-    if (countingDown) {
-      bipSound.play().setVolume(0.2);
-    }
-  }
-
-  // styles
-  const screenDaysHeight = 5;
-  const screenDaysWidth = 12;
-  const screenHeight = 7;
-  const screenWidth = 18;
-  const screenOnColor = 'red';
-  const screenOffColor = 'rgba(60,0,0,1)';
+  const isOn = state.phase !== 'off';
+  const label = isOn ? formatSpoken(state.remainingMs) : 'Minuteur éteint';
 
   return (
-    <View style={styles.mainContainer}>
-      <StatusBar hidden={true} />
-      <Animated.View
-        style={[
-          backgroundColorStyle,
-          {
-            height: 52,
-            width: '100%',
-            justifyContent: 'space-between',
-            alignItems: 'flex-end',
-            flexDirection: 'row',
-            position: 'absolute',
-            top: -20,
-          },
-        ]}
-      />
-      <Animated.View
-        style={[
-          backgroundColorStyle,
-          {
-            width: 40,
-            height: 40,
-            position: 'absolute',
-            top: 20,
-            left: 0,
-            borderBottomRightRadius: 20,
-            zIndex: 1,
-          },
-        ]}
-      />
-      <Animated.View
-        style={[
-          backgroundColorStyle,
-          {
-            width: 40,
-            height: 40,
-            position: 'absolute',
-            top: 20,
-            right: 0,
-            borderBottomLeftRadius: 20,
-            zIndex: 1,
-          },
-        ]}
-      />
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
+        <StatusBar hidden />
 
-      {/* header days */}
-      <View style={styles.screenDaysContainer}>
-        <Text style={styles.text}>DAYS</Text>
-        <View style={styles.screenDays}>
-          {countingDownConverter(tempsRestant, mode)
-            .days.split('')
-            .map((digit, i) => (
-              <SevenSegmentDisplay
-                key={i}
-                value={isActive ? digit : ''}
-                onColor={
-                  setupMode && setupValue === 3 && genererValeursBooleennes()[4]
-                    ? screenOffColor
-                    : screenOnColor
-                }
-                offColor={screenOffColor}
-                height={screenDaysHeight}
-                width={screenDaysWidth}
+        <View
+          style={styles.stack}
+          accessible
+          accessibilityRole="timer"
+          accessibilityLabel={label}>
+          <View style={styles.panel}>
+          {/* Jours */}
+          <View style={styles.block}>
+            <Text style={styles.caption}>DAYS</Text>
+            <View style={styles.row}>
+              {DAY_DIGITS.map((cell) => (
+                <Digit key={`${cell.matrix}-${cell.row}`} cell={cell} height={dayDigit} />
+              ))}
+            </View>
+          </View>
+
+          {/* Potentiomètre */}
+          <PowerDial size={dialSize} />
+
+          {/* Heures, minutes, secondes */}
+          <View style={styles.timeRow}>
+            <TimeGroup caption="HRS" cells={[HOURS.tens, HOURS.units]} height={timeDigit} />
+            <Colon columns={[1, 2]} size={timeDigit * 0.13} />
+            <TimeGroup caption="MINS" cells={[MINUTES.tens, MINUTES.units]} height={timeDigit} />
+            <Colon columns={[3, 4]} size={timeDigit * 0.13} />
+            <TimeGroup caption="SECS" cells={[SECONDS.tens, SECONDS.units]} height={timeDigit} />
+          </View>
+
+          {/* Témoins et bargraphes */}
+          <View style={styles.middle}>
+            <View style={styles.statusColumn}>
+              {STATUS_LEDS.map((led) => (
+                <StatusLed
+                  key={led.label}
+                  label={led.label}
+                  column={led.column}
+                  color={led.color}
+                  width={30}
+                />
+              ))}
+            </View>
+            <View style={styles.bargraphs}>
+              <BarGraph cell={BARGRAPH_LEFT} width={38} ledHeight={12} />
+              <View style={styles.ladder}>
+                {Array.from({ length: 9 }, (_, index) => (
+                  <Text key={index} style={styles.ladderRung}>
+                    --
+                  </Text>
+                ))}
+              </View>
+              <BarGraph cell={BARGRAPH_RIGHT} width={38} ledHeight={12} />
+            </View>
+          </View>
+          </View>
+
+          {/* Pavé */}
+          <View style={styles.pad}>
+            <View style={styles.padColumn}>
+              <PadButton label="1" large onPress={actions.increase} accessibilityLabel="Augmenter" />
+              <PadButton label="4" large onPress={actions.decrease} accessibilityLabel="Diminuer" />
+            </View>
+            <View style={styles.padRow}>
+              <PadButton label="PWR" onPress={actions.power} accessibilityLabel="Allumer ou éteindre" />
+              <PadButton
+                label="FCN"
+                onPress={actions.selectField}
+                accessibilityLabel="Choisir le champ à régler"
               />
-            ))}
-        </View>
-      </View>
-      {/* power zone */}
-      <View style={styles.powerContainer}>
-        <Power value={isActive} maxValue={10} numLEDs={10} />
-      </View>
-      {/* screens zone */}
-      <View style={styles.screensContainer}>
-        <View style={styles.mainDigits}>
-          <Text style={styles.text}>HRS</Text>
-          <View style={styles.digits}>
-            {countingDownConverter(tempsRestant, mode)
-              .hours.split('')
-              .map((digit, i) => (
-                <SevenSegmentDisplay
-                  key={i}
-                  value={isActive ? digit : ''}
-                  onColor={
-                    setupMode &&
-                    setupValue === 2 &&
-                    genererValeursBooleennes()[4]
-                      ? screenOffColor
-                      : screenOnColor
-                  }
-                  offColor={screenOffColor}
-                  height={screenHeight}
-                  width={screenWidth}
-                />
-              ))}
+              {/* La façade du prop porte « NAME / MENU ». Sur la réplique
+                  matérielle, le burnout a son propre bouton ; ici il prend la
+                  place de cette touche, qui ne servait à rien. */}
+              <PadButton
+                label={'NAME\nMENU'}
+                onPress={actions.vortex}
+                accessibilityLabel="Forcer le saut et passer en burnout"
+              />
+              <PadButton label="END" onPress={actions.end} accessibilityLabel="Lancer le saut" />
+            </View>
           </View>
         </View>
-        <View style={styles.collon}>
-          <LedRound
-            size={15}
-            isOn={countingDown && genererValeursBooleennes()[4]}
-          />
-          <LedRound
-            size={15}
-            isOn={countingDown && genererValeursBooleennes()[4]}
-          />
-        </View>
-        <View style={styles.mainDigits}>
-          <Text style={styles.text}>MINS</Text>
-          <View style={styles.digits}>
-            {countingDownConverter(tempsRestant, mode)
-              .minutes.split('')
-              .map((digit, i) => (
-                <SevenSegmentDisplay
-                  key={i}
-                  value={isActive ? digit : ' '}
-                  onColor={
-                    setupMode &&
-                    setupValue === 1 &&
-                    genererValeursBooleennes()[4]
-                      ? screenOffColor
-                      : screenOnColor
-                  }
-                  offColor={screenOffColor}
-                  height={screenHeight}
-                  width={screenWidth}
-                />
-              ))}
-          </View>
-        </View>
-        <View style={styles.collon}>
-          <LedRound
-            size={15}
-            isOn={countingDown && genererValeursBooleennes()[4]}
-          />
-          <LedRound
-            size={15}
-            isOn={countingDown && genererValeursBooleennes()[4]}
-          />
-        </View>
-        <View style={styles.mainDigits}>
-          <Text style={styles.text}>SECS</Text>
-          <View style={styles.digits}>
-            {countingDownConverter(tempsRestant, mode)
-              .seconds.split('')
-              .map((digit, i) => (
-                <SevenSegmentDisplay
-                  key={i}
-                  value={isActive ? digit : ' '}
-                  onColor={
-                    setupMode &&
-                    setupValue === 0 &&
-                    genererValeursBooleennes()[4]
-                      ? screenOffColor
-                      : screenOnColor
-                  }
-                  offColor={screenOffColor}
-                  height={screenHeight}
-                  width={screenWidth}
-                />
-              ))}
-          </View>
-        </View>
-      </View>
-      {/* main */}
-      <View style={styles.main}>
-        <View style={styles.mainLeft}>
-          <View style={styles.aside}>
-            <Led
-              size={30}
-              isOn={isActive && countingDown && genererValeursBooleennes()[1]}
-              color="yellow"
-            />
-            <Led
-              size={30}
-              isOn={isActive && countingDown && genererValeursBooleennes()[2]}
-              color="red"
-            />
-            <Led
-              size={30}
-              isOn={isActive && countingDown && genererValeursBooleennes()[3]}
-              color="green"
-            />
-          </View>
-          <View style={styles.aside}>
-            <Text style={styles.text}>TAU</Text>
-            <Text style={styles.text}>DELTA</Text>
-            <Text style={styles.text}>ZETA</Text>
-          </View>
-        </View>
-        <View style={styles.mainRight}>
-          <Bargraph
-            value={isActive && countingDown && genererValeursBooleennes()[5]}
-            maxValue={10}
-            numLEDs={10}
-            state={isActive}
-          />
-          <View style={{width: 10, height: 'auto'}}>
-            {Array(9)
-              .fill(0)
-              .map((_, i) => (
-                <Text key={i} style={{color: 'white', letterSpacing: -2}}>
-                  --
-                </Text>
-              ))}
-          </View>
-          <Bargraph
-            value={isActive && countingDown && genererValeursBooleennes()[5]}
-            maxValue={10}
-            numLEDs={10}
-            rotate={true}
-            state={isActive}
-          />
-        </View>
-      </View>
-      {/* buttons */}
-      <View style={styles.mainButtons}>
-        <View style={styles.colomunButtons}>
-          <Button
-            buttonName="1"
-            big={true}
-            onPress={() => {
-              setTime('add');
-            }}
-          />
-          <Button
-            buttonName="4"
-            big={true}
-            onPress={() => {
-              setTime('remove');
-            }}
-          />
-        </View>
-        <View style={styles.rowButtons}>
-          <Button
-            buttonName="PWR"
-            big={false}
-            onPress={() => {
-              powerToggle();
-            }}
-          />
-          <Button
-            buttonName="FCN"
-            big={false}
-            onPress={() => {
-              selectDigit();
-            }}
-          />
-          <Button
-            buttonName="
-          NAME 
-          MENU
-          "
-            big={false}
-            onPress={() => {}}
-          />
-          <Button
-            buttonName="END"
-            big={false}
-            onPress={() => {
-              countDown();
-              !randomMode && countingDown && slideBeforeTime();
-            }}
-          />
-        </View>
+      </SafeAreaView>
+    </SafeAreaProvider>
+  );
+}
+
+type TimeGroupProps = {
+  caption: string;
+  cells: readonly { matrix: 0 | 1; row: number }[];
+  height: number;
+};
+
+function TimeGroup({ caption, cells, height }: TimeGroupProps) {
+  return (
+    <View style={styles.block}>
+      <Text style={styles.caption}>{caption}</Text>
+      <View style={styles.row}>
+        {cells.map((cell) => (
+          <Digit key={`${cell.matrix}-${cell.row}`} cell={cell} height={height} />
+        ))}
       </View>
     </View>
   );
-};
+}
 
-export default App;
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: COLORS.background },
+  stack: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  // Le bloc d'affichage occupe tout l'espace au-dessus du pavé et répartit
+  // ses quatre rangées à l'intérieur : le pavé reste sous le pouce, sans
+  // laisser de vide au milieu sur les écrans très hauts.
+  panel: {
+    flex: 1,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+    paddingBottom: 8,
+  },
+  block: { alignItems: 'center' },
+  row: { flexDirection: 'row', alignItems: 'center' },
+  timeRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center' },
+  caption: {
+    color: COLORS.text,
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 1,
+    marginBottom: 2,
+  },
+  middle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+  },
+  statusColumn: { justifyContent: 'space-between', gap: 22 },
+  bargraphs: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  ladder: { alignItems: 'center' },
+  ladderRung: { color: COLORS.text, letterSpacing: -2, fontSize: 12, lineHeight: 14 },
+  pad: { width: '100%', gap: 12, paddingBottom: 4 },
+  padColumn: { alignItems: 'flex-start', gap: 10 },
+  padRow: { flexDirection: 'row', justifyContent: 'space-between', width: '100%' },
+});
