@@ -204,9 +204,13 @@ Ces champs dépendent de votre compte et ne peuvent pas être rédigés d'avance
 | URL d'assistance | Obligatoire sur l'App Store. Le dépôt GitHub fait l'affaire. |
 | Adresse de contact | Obligatoire sur Play. |
 
-## Le point qui reste ouvert
 
-`assets/vortex.mp4` est un extrait de la série. Tant qu'il est embarqué, la
-fiche est exposée à un retrait pour propriété intellectuelle — quelle que
-soit la prudence des textes ci-dessus. À remplacer par un rendu original
-avant publication.
+## Risque assumé
+
+`assets/vortex.mp4` est un extrait de la série. La fiche reste donc exposée à
+un retrait pour propriété intellectuelle, quelle que soit la prudence des
+textes ci-dessus. Décision prise de le conserver.
+
+Les textes limitent ce qui peut l'être : ils ne revendiquent aucune
+affiliation, n'emploient la marque que pour désigner l'objet reproduit, et
+annoncent explicitement un hommage de fan. Les visuels sont originaux.

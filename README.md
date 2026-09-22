@@ -132,17 +132,16 @@ Le code est sous licence MIT. Voir `LICENSE`.
 *Sliders* est une marque de ses ayants droit. Ce projet est un hommage de fan,
 sans affiliation ni licence officielle.
 
-### ⚠️ Avant toute publication : `assets/vortex.mp4`
+### `assets/vortex.mp4` — risque assumé
 
-Ce fichier est un extrait de la série. **Ces images ne sont pas libres de
-droits.** Les embarquer dans une application distribuée sur Google Play ou
-l'App Store expose à un retrait pour atteinte à la propriété intellectuelle —
-un risque d'autant moins théorique que l'application a déjà été retirée une
-fois.
+Ce fichier est un extrait de la série. Ces images ne sont pas libres de
+droits, et les embarquer dans une application publiée expose à un retrait
+pour atteinte à la propriété intellectuelle.
 
-Pour une publication, remplacer la source de `VortexPortal` par un rendu
-original. Le reste de l'habillage est dessiné, donc sans exposition.
+**Décision prise : le fichier reste.** Le risque est connu. S'il fallait
+revenir dessus, le remplacement ne touche qu'un fichier — `VortexPortal` lit
+une source unique, et tout le reste de l'habillage est dessiné.
 
-La même prudence vaut pour l'icône et la fiche du magasin : pas de logo, pas
-de visuel de la série, et une description qui dit clairement « hommage de fan,
-non officiel ».
+L'icône et les visuels de fiche, eux, sont entièrement originaux : aucun
+logo, aucun visuel de la série. Les textes de fiche annoncent explicitement
+un hommage de fan, sans affiliation.
