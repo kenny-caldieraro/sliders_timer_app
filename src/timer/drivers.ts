@@ -70,6 +70,10 @@ type Dispatch = (action: TimerAction) => void;
 /** Les deux phases où le temps défile. */
 const isCounting = (phase: Phase) => phase === 'running' || phase === 'burnout';
 
+/** Phases où le minuteur est sous tension et affiche l'heure. */
+const isPowered = (phase: Phase) =>
+  phase === 'idle' || phase === 'setup' || phase === 'running' || phase === 'burnout';
+
 /* ------------------------------------------------------------------ */
 /* Amorçage                                                            */
 /* ------------------------------------------------------------------ */
@@ -396,10 +400,6 @@ export function useStatusBlinkers(state: TimerState) {
   }, [active]);
 }
 
-/** Phases où le minuteur est sous tension et affiche l'heure. */
-const isPowered = (phase: Phase) =>
-  phase === 'idle' || phase === 'setup' || phase === 'running' || phase === 'burnout';
-
 /**
  * Battement des deux-points : deux fois par seconde dès que le minuteur est
  * allumé. C'est le signe le plus simple que l'objet est vivant, donc il ne
@@ -463,6 +463,12 @@ function bargraphTableFor(state: TimerState) {
 }
 
 /**
+ * Segments d'extrémité d'un bargraphe : colonnes 0 et 7, soit les bits de
+ * poids fort et faible du registre.
+ */
+const REST_PATTERN = 0x81;
+
+/**
  * Surcoût d'un tour de boucle Arduino.
  *
  * `animateBargraphe` attend `delayTime`, mais la boucle principale fait aussi
@@ -482,12 +488,17 @@ const LOOP_OVERHEAD_MS = 35;
  */
 export function useBargraph(state: TimerState) {
   const active = isCounting(state.phase);
+  const powered = isPowered(state.phase);
   const table = bargraphTableFor(state);
 
   useEffect(() => {
     if (!active) {
-      setRow(BARGRAPH_LEFT.matrix, BARGRAPH_LEFT.row, 0);
-      setRow(BARGRAPH_RIGHT.matrix, BARGRAPH_RIGHT.row, 0);
+      // Au repos, les deux segments d'extrémité restent allumés : c'est le
+      // témoin « sous tension » de la façade. Éteindre complètement les
+      // gouttières donnerait un objet mort alors qu'il attend un réglage.
+      const resting = powered ? REST_PATTERN : 0;
+      setRow(BARGRAPH_LEFT.matrix, BARGRAPH_LEFT.row, resting);
+      setRow(BARGRAPH_RIGHT.matrix, BARGRAPH_RIGHT.row, resting);
       return;
     }
 
@@ -509,7 +520,7 @@ export function useBargraph(state: TimerState) {
 
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
-  }, [active, table]);
+  }, [active, powered, table]);
 }
 
 /* ------------------------------------------------------------------ */

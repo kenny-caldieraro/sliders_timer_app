@@ -49,10 +49,10 @@ function PowerDialView({ size }: PowerDialProps) {
 
   const center = size / 2;
   // L'arc court au bord, la molette occupe le reste.
-  const arcStroke = size * 0.044;
-  const arcRadius = center - arcStroke * 0.9;
-  const ringRadius = size * 0.375;
-  const faceRadius = ringRadius * 0.76;
+  const arcStroke = size * 0.05;
+  const arcRadius = size * 0.452;
+  const ringRadius = size * 0.415;
+  const faceRadius = ringRadius * 0.78;
 
   const panResponder = useMemo(
     () =>
@@ -130,7 +130,7 @@ function PowerDialView({ size }: PowerDialProps) {
             <Path
               d={fill}
               stroke={COLORS.strip}
-              strokeWidth={arcStroke * 3.2}
+              strokeWidth={arcStroke * 2.6}
               strokeOpacity={glow * 0.16}
               strokeLinecap="round"
               fill="none"
@@ -138,7 +138,7 @@ function PowerDialView({ size }: PowerDialProps) {
             <Path
               d={fill}
               stroke={COLORS.strip}
-              strokeWidth={arcStroke * 1.9}
+              strokeWidth={arcStroke * 1.7}
               strokeOpacity={glow * 0.3}
               strokeLinecap="round"
               fill="none"

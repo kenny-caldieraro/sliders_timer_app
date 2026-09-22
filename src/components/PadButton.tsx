@@ -18,27 +18,33 @@ export type PadButtonProps = {
   onPress: () => void;
   /** Les deux grosses touches « 1 » et « 4 » du pavé. */
   large?: boolean;
+  /** Dimensions imposées par la mise en page. */
+  width: number;
+  height: number;
   /** Lettres du clavier téléphonique, en petit au-dessus du chiffre. */
   letters?: string;
   accessibilityLabel?: string;
   disabled?: boolean;
 };
 
-const SIZES = {
-  large: { width: 96, height: 48, radius: 20, font: 23 },
-  small: { width: 80, height: 46, radius: 19, font: 12.5 },
-} as const;
-
 function PadButtonView({
   label,
   onPress,
   large = false,
+  width,
+  height,
   letters,
   accessibilityLabel,
   disabled = false,
 }: PadButtonProps) {
   const [pressed, setPressed] = useState(false);
-  const size = large ? SIZES.large : SIZES.small;
+  // Le rayon suit la hauteur : la touche reste une pastille à toute taille.
+  const size = {
+    width,
+    height,
+    radius: height * 0.42,
+    font: large ? height * 0.46 : Math.min(height * 0.28, 14),
+  };
   const id = `key-${large ? 'l' : 's'}-${label.replace(/\W/g, '')}`;
 
   const handlePress = useCallback(() => {
@@ -105,7 +111,7 @@ const styles = StyleSheet.create({
   },
   letters: {
     color: COLORS.textDim,
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: '700',
     letterSpacing: 0.5,
   },

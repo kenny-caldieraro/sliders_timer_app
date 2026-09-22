@@ -30,6 +30,12 @@ function ColonView({ columns, size, spread }: ColonProps) {
             height: size,
             borderRadius: size / 2,
             backgroundColor: on ? COLORS.led : COLORS.ledOff,
+            // Le halo est indispensable : sans lui les points se perdent dans
+            // le rétroéclairage de la bande.
+            shadowColor: COLORS.led,
+            shadowOpacity: on ? 0.95 : 0,
+            shadowRadius: size * 0.9,
+            shadowOffset: { width: 0, height: 0 },
           }}
         />
       ))}
