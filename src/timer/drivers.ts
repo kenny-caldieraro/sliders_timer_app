@@ -107,20 +107,34 @@ export function useBootSequence(state: TimerState, dispatch: Dispatch) {
       setEdges(false);
       clearStrip();
 
-      if (isFirstBoot.current) {
-        isFirstBoot.current = false;
+      const withClip = isFirstBoot.current;
+      if (withClip) {
         playClip('activation');
         await sleep(BOOT_INTRO_DELAY_MS, token);
       }
 
       await playGenser(token);
       await playDisplayWrap(token);
-      await sleep(BOOT_OUTRO_DELAY_MS, token);
 
+      // `displayWrap` se termine par un `showTime` dans le firmware. Sans lui,
+      // la dernière image du balayage reste figée à l'écran pendant toute
+      // l'attente de fin de clip.
       clearAll();
       showTime(remainingRef.current);
       setEdges(true);
       setColons(true);
+
+      // Cette attente n'existe que pour laisser le clip d'activation se
+      // terminer. Sans clip, elle ne serait que du temps mort.
+      if (withClip) {
+        await sleep(BOOT_OUTRO_DELAY_MS, token);
+      }
+
+      // Le drapeau n'est consommé qu'une fois la séquence menée à terme.
+      // Le marquer dès l'entrée le perdait sur une exécution annulée : en
+      // développement React monte les effets deux fois, et le second passage
+      // sautait alors le clip et ses temporisations.
+      isFirstBoot.current = false;
       dispatch({ type: 'BOOT_DONE' });
     });
 
