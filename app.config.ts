@@ -81,8 +81,46 @@ const config: ExpoConfig = {
         defaultChannel: 'timer',
       },
     ],
-    'expo-audio',
-    'react-native-audio-api',
+    [
+      'expo-audio',
+      {
+        /*
+         * Par défaut ce greffon prépare une application de lecture média :
+         * audio en arrière-plan, service de premier plan, et permission
+         * micro sur Android. Un minuteur n'a besoin d'aucun des trois, et
+         * demander le micro sur une réplique de minuteur est exactement le
+         * genre de permission qui fait fuir un utilisateur et alerter un
+         * relecteur.
+         */
+        enableBackgroundPlayback: false,
+        enableBackgroundRecording: false,
+        recordAudioAndroid: false,
+        // `false` supprime la clé plutôt que d'en écrire une par défaut :
+        // une justification d'accès au micro qu'on n'utilise pas est une
+        // question de plus au moment de la relecture.
+        microphonePermission: false,
+      },
+    ],
+    [
+      'react-native-audio-api',
+      {
+        /*
+         * Le greffon active par défaut l'audio en arrière-plan, un service de
+         * premier plan Android et FFmpeg. Le minuteur n'a besoin d'aucun des
+         * trois : il ne sert qu'un oscillateur, et pose explicitement
+         * `shouldPlayInBackground: false`.
+         *
+         * Les laisser coûte cher côté magasins. Apple rejette une application
+         * qui déclare `UIBackgroundModes: audio` sans s'en servir, et depuis
+         * Android 14 un service de premier plan de type `mediaPlayback` exige
+         * un formulaire de justification en Play Console.
+         */
+        iosBackgroundMode: false,
+        androidForegroundService: false,
+        androidPermissions: [],
+        disableFFmpeg: true,
+      },
+    ],
   ],
 
   experiments: {
