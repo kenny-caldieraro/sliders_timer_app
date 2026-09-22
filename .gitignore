@@ -12,6 +12,11 @@ expo-env.d.ts
 /ios
 /android
 
+# Artefacts de build
+*.aab
+*.apk
+*.ipa
+
 # Signature — JAMAIS dans le repo.
 # Le keystore de release est sauvegarde hors depot et gere par EAS Credentials.
 *.jks
