@@ -80,7 +80,13 @@ export const BLINK_INTERVALS = {
   red: 600,
   yellow: 250,
   green: 200,
-  colon: 150,
+  /**
+   * Deux-points : 250 ms d'état, soit deux clignotements par seconde.
+   * Le firmware bascule toutes les 150 ms, ce qui donne un battement plus
+   * nerveux ; on garde ici le rythme d'une seconde, plus lisible à l'écran
+   * et conforme à ce qu'on attend d'une horloge.
+   */
+  colon: 250,
 } as const;
 
 /** Nombre de LED de l'arc du potentiomètre (bandeau NeoPixel). */

@@ -10,15 +10,18 @@ import { COLORS } from '../theme';
 export type ColonProps = {
   /** Colonnes des deux points sur la ligne des séparateurs. */
   columns: readonly [number, number];
+  /** Diamètre d'un point. */
   size: number;
+  /** Écartement des deux points, calé sur la hauteur des chiffres. */
+  spread: number;
 };
 
-function ColonView({ columns, size }: ColonProps) {
+function ColonView({ columns, size, spread }: ColonProps) {
   const top = useLed(COLON_ROW.matrix, COLON_ROW.row, columns[0]);
   const bottom = useLed(COLON_ROW.matrix, COLON_ROW.row, columns[1]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { height: spread, marginHorizontal: size * 0.35 }]}>
       {[top, bottom].map((on, index) => (
         <View
           key={index}
@@ -35,7 +38,7 @@ function ColonView({ columns, size }: ColonProps) {
 }
 
 const styles = StyleSheet.create({
-  container: { justifyContent: 'space-between', alignItems: 'center', height: 52 },
+  container: { justifyContent: 'space-between', alignItems: 'center' },
 });
 
 export const Colon = memo(ColonView);

@@ -1,18 +1,18 @@
 import { StatusBar } from 'expo-status-bar';
 import { useCallback, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { BarGraph } from './src/components/BarGraph';
 import { Colon } from './src/components/Colon';
 import { Digit } from './src/components/Digit';
+import { DisplayBand } from './src/components/DisplayBand';
 import { Emitter } from './src/components/Emitter';
 import { HelpSheet } from './src/components/HelpSheet';
 import { PadButton } from './src/components/PadButton';
 import { PowerDial } from './src/components/PowerDial';
 import { StatusLed } from './src/components/StatusLed';
-import { Vortex } from './src/components/Vortex';
+import { VortexPortal } from './src/components/VortexPortal';
 import { Window } from './src/components/Window';
 import {
   BARGRAPH_LEFT,
@@ -34,6 +34,9 @@ import { useTimer } from './src/timer/useTimer';
  * témoins et les bargraphes sont abonnés individuellement aux lignes des
  * matrices, donc une animation à soixante images par seconde ne le traverse
  * jamais.
+ *
+ * Les proportions suivent l'objet : une grosse molette, une bande horaire
+ * pleine largeur, et le pavé en bas sous le pouce.
  */
 export default function App() {
   const { width, height } = useWindowDimensions();
@@ -43,15 +46,37 @@ export default function App() {
   const openHelp = useCallback(() => setHelpVisible(true), []);
   const closeHelp = useCallback(() => setHelpVisible(false), []);
 
-  // Toutes les tailles dérivent de la largeur : l'interface tient aussi bien
-  // sur un petit écran que sur une tablette, sans hauteur codée en dur.
-  // Budget vertical : le panneau doit tenir au-dessus du pavé sans le
-  // recouvrir. Chaque taille est plafonnée par la hauteur disponible, pas
-  // seulement par la largeur.
-  const timeDigit = Math.min(width * 0.17, height * 0.088);
-  const dayDigit = timeDigit * 0.48;
-  const dialSize = Math.min(width * 0.37, height * 0.15);
-  const vortexSize = Math.min(width * 0.33, height * 0.125);
+  // Toutes les tailles dérivent de la largeur, plafonnées par la hauteur :
+  // l'interface tient aussi bien sur un petit écran que sur une tablette.
+  // Budget vertical. Le panneau doit loger six rangées au-dessus du pavé :
+  // chaque taille est donc plafonnée par la hauteur, pas seulement par la
+  // largeur, sinon le bloc déborde sur un écran court.
+  /*
+   * Proportions relevées sur l'objet réel :
+   *   - les six afficheurs horaires occupent la largeur presque bord à bord ;
+   *   - les afficheurs de jours font environ 70 % de leur hauteur ;
+   *   - la molette est petite, à peu près un tiers de la largeur ;
+   *   - l'ensemble est dense, pas étalé sur la hauteur.
+   *
+   * La taille des chiffres se déduit donc du contenu — un afficheur est
+   * 0,62 fois plus large que haut, six d'affilée plus deux séparateurs —
+   * et non d'une fraction arbitraire de l'écran.
+   */
+  const DIGIT_RATIO = 0.622;
+  const timeDigit = Math.min((width * 0.92) / (6 * DIGIT_RATIO + 0.34), height * 0.105);
+  const dayDigit = timeDigit * 0.7;
+  const dialSize = Math.min(width * 0.33, height * 0.148);
+  const bandHeight = timeDigit * 1.2;
+  // Le bandeau du vortex coiffe l'écran, hors du flux : il ne vole aucune
+  // place aux afficheurs.
+  const portalHeight = Math.max(height * 0.07, 54);
+
+  // Hauteur des bargraphes, calculée ici pour que l'échelle gravée et la
+  // rangée entière s'y accordent. Une hauteur en pourcentage créerait une
+  // dépendance circulaire avec le parent, que yoga résout en gonflant le bloc.
+  const barSegment = 8;
+  const barGap = 4;
+  const barHeight = 8 * (barSegment + barGap) - barGap + 8;
 
   const isOn = state.phase !== 'off';
   const label = isOn ? formatSpoken(state.remainingMs) : 'Minuteur éteint';
@@ -59,28 +84,8 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <View style={styles.root}>
-        {/* Corps de l'objet : plastique moulé, plus clair en haut. */}
-        <Svg style={StyleSheet.absoluteFill} width={width} height={height}>
-          <Defs>
-            <LinearGradient id="chassis" x1="0" y1="0" x2="0.35" y2="1">
-              <Stop offset="0" stopColor={COLORS.chassisTop} />
-              <Stop offset="0.55" stopColor={COLORS.chassisBottom} />
-              <Stop offset="1" stopColor={COLORS.background} />
-            </LinearGradient>
-          </Defs>
-          <Rect x={0} y={0} width={width} height={height} fill="url(#chassis)" />
-        </Svg>
-
-        {/*
-          Grain du plastique, relevé sur une photo de la réplique. Posé en
-          surimpression légère : il donne la matière sans toucher à la couleur.
-        */}
-        <Image
-          source={require('./assets/texture-chassis.png')}
-          style={styles.texture}
-          resizeMode="cover"
-          accessible={false}
-        />
+        {/* Le vortex, au ras du bord haut, comme sur la façade d'origine */}
+        <VortexPortal width={width} height={portalHeight} phase={state.phase} />
 
         <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
           <StatusBar hidden />
@@ -102,14 +107,12 @@ export default function App() {
             accessibilityRole="timer"
             accessibilityLabel={label}>
             <View style={styles.panel}>
-              {/* Vortex, sur le devant, juste au-dessus des LED de l'émetteur */}
-              <Vortex size={vortexSize} phase={state.phase} />
-
-              {/* Émetteur : deux LED blanches au centre, deux rouges aux bouts */}
-              <Emitter width={Math.min(width * 0.5, 230)} />
+              {/* Émetteur : la barre traverse toute la façade, deux LED
+                  blanches au centre et deux rouges aux extrémités */}
+              <Emitter width={width} />
 
               {/* Jours */}
-              <Window inset={18}>
+              <Window inset={10}>
                 <Text style={styles.caption}>DAYS</Text>
                 <View style={styles.row}>
                   {DAY_DIGITS.map((cell) => (
@@ -118,60 +121,76 @@ export default function App() {
                 </View>
               </Window>
 
-              {/* Potentiomètre */}
+              {/* Molette */}
               <PowerDial size={dialSize} />
 
-              {/* Heures, minutes, secondes */}
-              <Window inset={12}>
-                <View style={styles.timeRow}>
-                  <TimeGroup caption="HRS" cells={[HOURS.tens, HOURS.units]} height={timeDigit} />
-                  <Colon columns={[1, 2]} size={timeDigit * 0.12} />
-                  <TimeGroup
-                    caption="MINS"
-                    cells={[MINUTES.tens, MINUTES.units]}
-                    height={timeDigit}
-                  />
-                  <Colon columns={[3, 4]} size={timeDigit * 0.12} />
-                  <TimeGroup
-                    caption="SECS"
-                    cells={[SECONDS.tens, SECONDS.units]}
-                    height={timeDigit}
-                  />
+              {/* Heures, minutes, secondes, sur bande rétroéclairée */}
+              <View style={styles.bandBlock}>
+                <View style={styles.bandCaptions}>
+                  <Text style={styles.caption}>HRS</Text>
+                  <Text style={styles.caption}>MINS</Text>
+                  <Text style={styles.caption}>SECS</Text>
                 </View>
-              </Window>
+                <DisplayBand width={width} height={bandHeight}>
+                  <View style={styles.timeRow}>
+                    <Digit cell={HOURS.tens} height={timeDigit} />
+                    <Digit cell={HOURS.units} height={timeDigit} />
+                    <Colon
+                      columns={[1, 2]}
+                      size={timeDigit * 0.1}
+                      spread={timeDigit * 0.42}
+                    />
+                    <Digit cell={MINUTES.tens} height={timeDigit} />
+                    <Digit cell={MINUTES.units} height={timeDigit} />
+                    <Colon
+                      columns={[3, 4]}
+                      size={timeDigit * 0.1}
+                      spread={timeDigit * 0.42}
+                    />
+                    <Digit cell={SECONDS.tens} height={timeDigit} />
+                    <Digit cell={SECONDS.units} height={timeDigit} />
+                  </View>
+                </DisplayBand>
+              </View>
 
-              {/* Témoins et bargraphes */}
-              <Window inset={16} style={styles.middleWindow}>
-                <View style={styles.middle}>
-                  <View style={styles.statusColumn}>
-                    {STATUS_LEDS.map((led) => (
-                      <StatusLed
-                        key={led.label}
-                        label={led.label}
-                        column={led.column}
-                        color={led.color}
-                        width={26}
-                      />
+              {/* Témoins et bargraphes, à même la façade */}
+              <View style={[styles.middle, { height: barHeight }]}>
+                <View style={styles.statusColumn}>
+                  {STATUS_LEDS.map((led) => (
+                    <StatusLed
+                      key={led.label}
+                      label={led.label}
+                      column={led.column}
+                      color={led.color}
+                      width={26}
+                    />
+                  ))}
+                </View>
+                <View style={styles.bargraphs}>
+                  <BarGraph
+                    cell={BARGRAPH_LEFT}
+                    width={28}
+                    ledHeight={barSegment}
+                    gap={barGap}
+                  />
+                  <View style={[styles.ladder, { height: barHeight - 10 }]}>
+                    {Array.from({ length: 9 }, (_, index) => (
+                      <View key={index} style={styles.rung} />
                     ))}
                   </View>
-                  <View style={styles.bargraphs}>
-                    <BarGraph cell={BARGRAPH_LEFT} width={32} ledHeight={9} />
-                    <View style={styles.ladder}>
-                      {Array.from({ length: 6 }, (_, index) => (
-                        <Text key={index} style={styles.ladderRung}>
-                          --
-                        </Text>
-                      ))}
-                    </View>
-                    <BarGraph cell={BARGRAPH_RIGHT} width={32} ledHeight={9} />
-                  </View>
+                  <BarGraph
+                    cell={BARGRAPH_RIGHT}
+                    width={28}
+                    ledHeight={barSegment}
+                    gap={barGap}
+                  />
                 </View>
-              </Window>
+              </View>
             </View>
 
             {/* Pavé */}
             <View style={styles.pad}>
-              <View style={styles.padColumn}>
+              <View style={styles.keypadPanel}>
                 <PadButton
                   label="1"
                   large
@@ -181,6 +200,7 @@ export default function App() {
                 <PadButton
                   label="4"
                   large
+                  letters="GHI"
                   onPress={actions.decrease}
                   accessibilityLabel="Diminuer"
                 />
@@ -220,91 +240,69 @@ export default function App() {
   );
 }
 
-type TimeGroupProps = {
-  caption: string;
-  cells: readonly { matrix: 0 | 1; row: number }[];
-  height: number;
-};
-
-function TimeGroup({ caption, cells, height }: TimeGroupProps) {
-  return (
-    <View style={styles.block}>
-      <Text style={styles.caption}>{caption}</Text>
-      <View style={styles.row}>
-        {cells.map((cell) => (
-          <Digit key={`${cell.matrix}-${cell.row}`} cell={cell} height={height} />
-        ))}
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: COLORS.background },
   safe: { flex: 1 },
-  // L'image ne doit jamais intercepter un appui : `pointerEvents` passe
-  // par le style, `Image` ne l'accepte pas en propriété.
-  texture: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    opacity: 0.17,
-    pointerEvents: 'none',
-  },
-  topBar: { paddingHorizontal: 18, paddingTop: 4, alignItems: 'flex-start' },
+  topBar: { paddingHorizontal: 16, paddingTop: 2, alignItems: 'flex-start' },
   helpButton: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: 'rgba(242, 242, 242, 0.35)',
+    borderColor: 'rgba(216, 216, 216, 0.32)',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.35)',
   },
-  helpPressed: { backgroundColor: 'rgba(255, 255, 255, 0.16)' },
-  helpGlyph: { color: COLORS.text, fontSize: 17, fontWeight: '800', lineHeight: 20 },
-  stack: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingBottom: 12,
-  },
-  // Le bloc d'affichage occupe tout l'espace au-dessus du pavé et répartit
-  // ses rangées à l'intérieur : le pavé reste sous le pouce, sans laisser de
-  // vide au milieu sur les écrans très hauts.
+  helpPressed: { backgroundColor: 'rgba(255, 255, 255, 0.14)' },
+  helpGlyph: { color: COLORS.text, fontSize: 16, fontWeight: '800', lineHeight: 19 },
+  stack: { flex: 1, alignItems: 'center', justifyContent: 'space-between' },
+  // L'objet est dense : des écarts fixes, et le bloc centré sur la hauteur
+  // restante. `space-evenly` étalait les rangées sur tout l'écran.
   panel: {
     flex: 1,
     width: '100%',
     alignItems: 'center',
-    justifyContent: 'space-evenly',
-    paddingBottom: 8,
+    justifyContent: 'center',
+    gap: 14,
   },
-  block: { alignItems: 'center' },
   row: { flexDirection: 'row', alignItems: 'center' },
-  timeRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'center' },
   caption: {
     color: COLORS.text,
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
-    letterSpacing: 1.2,
-    marginBottom: 2,
+    letterSpacing: 1.1,
   },
-  middleWindow: { width: '100%' },
+  // La bande touche les deux bords : c'est une découpe dans la façade, pas
+  // un bloc posé dessus.
+  bandBlock: { width: '100%', alignItems: 'center' },
+  bandCaptions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '86%',
+    marginBottom: 5,
+  },
+  timeRow: { flexDirection: 'row', alignItems: 'center' },
   middle: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
+    paddingHorizontal: 18,
   },
-  statusColumn: { justifyContent: 'space-between', gap: 10 },
-  bargraphs: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  ladder: { alignItems: 'center' },
-  ladderRung: { color: 'rgba(242, 242, 242, 0.55)', letterSpacing: -2, fontSize: 11, lineHeight: 13 },
-  pad: { width: '100%', gap: 12 },
-  padColumn: { alignItems: 'flex-start', gap: 10 },
+  statusColumn: { justifyContent: 'space-between', gap: 14 },
+  bargraphs: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  ladder: { alignItems: 'center', justifyContent: 'space-between' },
+  rung: { width: 11, height: 2, borderRadius: 1, backgroundColor: COLORS.ladder },
+  pad: { width: '100%', gap: 10, paddingHorizontal: 12, paddingBottom: 6 },
+  // Le pavé 1 / 4 est sur une platine rapportée, légèrement plus claire.
+  keypadPanel: {
+    alignSelf: 'flex-start',
+    gap: 8,
+    padding: 8,
+    borderRadius: 10,
+    backgroundColor: COLORS.keypadPanel,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: COLORS.keypadPanelEdge,
+  },
   padRow: { flexDirection: 'row', justifyContent: 'space-between', width: '100%' },
 });

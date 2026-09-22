@@ -11,6 +11,7 @@ import {
   useBargraph,
   useBeeps,
   useBootSequence,
+  useColonBlink,
   useCountdownTick,
   useDeadState,
   useEmitter,
@@ -65,6 +66,7 @@ export function useTimer(): Timer {
   useTimeDisplay(state);
   useSetupBlink(state);
   useStatusBlinkers(state);
+  useColonBlink(state);
   useBargraph(state);
   useBeeps(state);
   useStripPulse(state);

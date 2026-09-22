@@ -1,47 +1,80 @@
-/** Palette du minuteur, calée sur les composants de la réplique matérielle. */
+/**
+ * Palette et matières du minuteur.
+ *
+ * La référence visuelle est le rendu de l'objet sur fond noir : ce n'est pas
+ * le fond qui porte la matière, ce sont les pièces. Chaque élément a son
+ * traitement — collerette biseautée de la molette, gouttières des bargraphes,
+ * bande rétroéclairée des afficheurs, contours des touches.
+ */
 export const COLORS = {
-  /** Fond de la coque. */
-  background: '#0b0d10',
-  /**
-   * Châssis. Sur la réplique, le corps est un plastique gris-bleu et les
-   * afficheurs sont encastrés derrière des fenêtres noires. Tout peindre en
-   * noir uniforme écrase ce relief.
-   */
-  chassisTop: '#2b313a',
-  chassisBottom: '#12161b',
-  /** Fenêtre d'afficheur, en creux dans le châssis. */
-  window: '#050607',
-  /** Arêtes : lumière en haut, ombre en bas, comme une pièce moulée. */
-  bevelLight: 'rgba(255, 255, 255, 0.10)',
-  bevelDark: 'rgba(0, 0, 0, 0.65)',
-  /** Afficheurs sept segments : LED rouges. */
-  led: '#ff2d2d',
-  /** Segment éteint — un vrai afficheur n'est jamais tout à fait noir. */
-  ledOff: 'rgba(70, 8, 8, 1)',
-  /** Témoins latéraux. */
+  /** Fond : noir franc, sans dégradé ni texture. */
+  background: '#000000',
+
+  /* --- Afficheurs sept segments --- */
+  /** Segment allumé. */
+  led: '#ff1e1e',
+  /** Segment éteint : visible, mais à peine. */
+  ledOff: 'rgba(96, 8, 8, 0.85)',
+  /** Rétroéclairage de la bande horaire, du plus sombre au plus vif. */
+  displayBackDark: '#2c0000',
+  displayBackLit: '#6b0000',
+  /** Liseré clair sur les arêtes de la bande. */
+  displayEdge: 'rgba(255, 228, 228, 0.55)',
+
+  /* --- Témoins latéraux --- */
   red: '#ff2020',
-  redOff: 'rgba(70, 0, 0, 1)',
+  redOff: '#3a3a3a',
   yellow: '#ffd21e',
-  yellowOff: 'rgba(66, 55, 0, 1)',
-  green: '#22ff5a',
-  greenOff: 'rgba(0, 62, 20, 1)',
-  /** Bargraphes. */
-  bar: '#22ff5a',
-  barOff: 'rgba(0, 40, 13, 1)',
-  /** Arc du potentiomètre : guide de lumière continu. */
-  strip: '#ff2d2d',
-  stripOff: 'rgba(48, 6, 6, 1)',
-  /** Émetteur : deux sources blanches au centre, deux rouges aux extrémités. */
+  yellowOff: '#3a3a3a',
+  green: '#2bff55',
+  greenOff: '#3a3a3a',
+
+  /* --- Bargraphes --- */
+  /** Segment allumé. */
+  bar: '#2bff4f',
+  /** Gouttière : le canal sombre dans lequel les segments sont encastrés. */
+  barChannel: '#1c1c1c',
+  barChannelEdge: '#2e2e2e',
+  /** Échelle gravée entre les deux gouttières. */
+  ladder: '#5a5a5a',
+
+  /* --- Molette --- */
+  /** Collerette extérieure, éclairée en haut à gauche. */
+  knobRingLight: '#4a4a4a',
+  knobRingDark: '#151515',
+  /** Face du bouton. */
+  knobFaceLight: '#3c3c3c',
+  knobFaceDark: '#111111',
+  /** Fente diagonale. */
+  knobSlot: '#2a2a2a',
+  knobSlotEdge: '#555555',
+
+  /* --- Arc lumineux --- */
+  strip: '#ff2020',
+  stripHot: '#ff8a6a',
+  stripOff: 'rgba(40, 4, 4, 0.9)',
+
+  /* --- Émetteur --- */
   vortexWhite: '#fdf6e8',
   vortexRed: '#ff2f2f',
-  /** Vortex d'arrière-plan : bleu froid, cœur blanc. */
+
+  /* --- Vortex d'arrière-plan --- */
   vortexGlow: '#3d7dff',
   vortexCore: '#cfe4ff',
-  /** Sérigraphie et contours. */
-  text: '#f2f2f2',
-  outline: '#f2f2f2',
-  knob: '#0e0e0e',
-  knobRing: 'rgba(38, 38, 38, 0.9)',
+
+  /* --- Touches --- */
+  /** Contour biseauté des touches, clair en haut. */
+  keyEdgeLight: '#9a9a9a',
+  keyEdgeDark: '#4a4a4a',
+  keyFace: '#141414',
+  keyFacePressed: '#2a2a2a',
+  /** Panneau légèrement plus clair sous le pavé 1 / 4. */
+  keypadPanel: '#141414',
+  keypadPanelEdge: '#2c2c2c',
+
+  /* --- Sérigraphie --- */
+  text: '#d8d8d8',
+  textDim: '#8a8a8a',
 } as const;
 
 /** Couleur d'un témoin selon son état. */

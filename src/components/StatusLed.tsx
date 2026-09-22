@@ -25,10 +25,8 @@ function StatusLedView({ label, column, color, width }: StatusLedProps) {
           styles.led,
           {
             width,
-            height: width / 2.4,
+            height: width / 2.6,
             backgroundColor: on ? palette.on : palette.off,
-            shadowColor: palette.on,
-            shadowOpacity: on ? 0.9 : 0,
           },
         ]}
       />
@@ -38,17 +36,13 @@ function StatusLedView({ label, column, color, width }: StatusLedProps) {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  led: {
-    borderRadius: 3,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 0 },
-  },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 9 },
+  led: { borderRadius: 2.5 },
   label: {
     color: COLORS.text,
     fontSize: 13,
     fontWeight: '700',
-    letterSpacing: 0.5,
+    letterSpacing: 0.6,
   },
 });
 

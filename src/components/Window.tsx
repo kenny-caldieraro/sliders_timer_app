@@ -5,49 +5,30 @@ import { StyleSheet, View, type ViewStyle } from 'react-native';
 import { COLORS } from '../theme';
 
 /**
- * Fenêtre d'afficheur encastrée dans le châssis.
+ * Petite fenêtre d'afficheur, encastrée dans la façade.
  *
- * Sur la réplique, les afficheurs sont au fond d'une découpe : l'arête haute
- * prend l'ombre, l'arête basse accroche la lumière. C'est ce relief qui
- * distingue une façade moulée d'un aplat noir.
+ * Sert au bloc des jours, qui n'a pas le rétroéclairage de la bande horaire :
+ * c'est une simple découpe, légèrement plus claire que le noir du châssis.
  */
 
 export type WindowProps = {
   children: ReactNode;
   style?: ViewStyle;
-  /** Marge intérieure horizontale. */
   inset?: number;
 };
 
-function WindowView({ children, style, inset = 14 }: WindowProps) {
-  return (
-    <View style={[styles.frame, { paddingHorizontal: inset }, style]}>
-      <View style={styles.sheen} pointerEvents="none" />
-      {children}
-    </View>
-  );
+function WindowView({ children, style, inset = 12 }: WindowProps) {
+  return <View style={[styles.frame, { paddingHorizontal: inset }, style]}>{children}</View>;
 }
 
 const styles = StyleSheet.create({
   frame: {
-    backgroundColor: COLORS.window,
-    borderRadius: 12,
-    paddingVertical: 8,
-    borderTopWidth: StyleSheet.hairlineWidth * 3,
-    borderTopColor: COLORS.bevelDark,
-    borderBottomWidth: StyleSheet.hairlineWidth * 3,
-    borderBottomColor: COLORS.bevelLight,
+    backgroundColor: '#0a0a0a',
+    borderRadius: 6,
+    paddingVertical: 5,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: COLORS.barChannelEdge,
     alignItems: 'center',
-    overflow: 'hidden',
-  },
-  // Reflet du plexiglas, en haut de la découpe.
-  sheen: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '42%',
-    backgroundColor: 'rgba(255, 255, 255, 0.022)',
   },
 });
 

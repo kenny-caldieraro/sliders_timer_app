@@ -107,11 +107,11 @@ const styles = StyleSheet.create({
   backdrop: { flex: 1, backgroundColor: 'rgba(0, 0, 0, 0.72)', justifyContent: 'flex-end' },
   sheet: {
     maxHeight: '86%',
-    backgroundColor: COLORS.chassisBottom,
+    backgroundColor: '#101010',
     borderTopLeftRadius: 22,
     borderTopRightRadius: 22,
     borderTopWidth: StyleSheet.hairlineWidth * 3,
-    borderTopColor: COLORS.bevelLight,
+    borderTopColor: 'rgba(255, 255, 255, 0.12)',
     paddingHorizontal: 22,
     paddingTop: 10,
     paddingBottom: 26,

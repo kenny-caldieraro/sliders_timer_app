@@ -1,18 +1,18 @@
 import { memo } from 'react';
-import Svg, { Rect } from 'react-native-svg';
+import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { useChrome, useRow } from '../hardware/display';
 import { columnMaskOf, type Cell } from '../hardware/layout';
 import { COLORS } from '../theme';
 
 /**
- * Bargraphe vertical de huit segments, câblé sur une ligne de matrice.
+ * Bargraphe vertical de huit segments.
+ *
+ * Les segments sont encastrés dans une gouttière sombre, comme sur l'objet :
+ * le canal reste visible même éteint, et c'est lui qui donne l'échelle.
  *
  * Les colonnes suivent la convention de `LedControl` : la colonne 0 est le
- * bit de poids fort, et se trouve en haut du bargraphe.
- *
- * Chaque segment allumé est doublé d'un halo translucide : sur la réplique
- * ce sont des barres vertes derrière un diffuseur, pas des rectangles nets.
+ * bit de poids fort, et se trouve en haut.
  */
 
 export type BarGraphProps = {
@@ -22,47 +22,55 @@ export type BarGraphProps = {
   gap?: number;
 };
 
-function BarGraphView({ cell, width, ledHeight, gap = 3 }: BarGraphProps) {
+function BarGraphView({ cell, width, ledHeight, gap = 4 }: BarGraphProps) {
   const value = useRow(cell.matrix, cell.row);
   const chrome = useChrome();
   const dimmed = chrome.off[cell.matrix];
 
+  const padding = 4;
   const pitch = ledHeight + gap;
-  const height = pitch * 8;
-  const halo = Math.min(gap, 4);
+  const innerHeight = pitch * 8 - gap;
+  const height = innerHeight + padding * 2;
+  const totalWidth = width + padding * 2;
+  const gradientId = `bar-${cell.matrix}-${cell.row}`;
 
   return (
-    <Svg width={width + halo * 2} height={height}>
+    <Svg width={totalWidth} height={height}>
+      <Defs>
+        <LinearGradient id={gradientId} x1="0" y1="0" x2="1" y2="0">
+          <Stop offset="0" stopColor={COLORS.barChannelEdge} />
+          <Stop offset="0.35" stopColor={COLORS.barChannel} />
+          <Stop offset="1" stopColor="#101010" />
+        </LinearGradient>
+      </Defs>
+
+      {/* Gouttière */}
+      <Rect
+        x={0}
+        y={0}
+        width={totalWidth}
+        height={height}
+        rx={5}
+        ry={5}
+        fill={`url(#${gradientId})`}
+      />
+
       {Array.from({ length: 8 }, (_, index) => {
         const on = !dimmed && (value & columnMaskOf(index)) !== 0;
-        const y = index * pitch;
-        return on ? (
-          <Rect
-            key={index}
-            x={0}
-            y={y}
-            width={width + halo * 2}
-            height={ledHeight + halo}
-            rx={3}
-            ry={3}
-            fill={COLORS.bar}
-            fillOpacity={0.28}
-          />
-        ) : null;
-      })}
-      {Array.from({ length: 8 }, (_, index) => {
-        const on = !dimmed && (value & columnMaskOf(index)) !== 0;
-        const y = index * pitch;
+        const y = padding + index * pitch;
+        if (!on) {
+          return null;
+        }
         return (
           <Rect
             key={index}
-            x={halo}
-            y={y + halo / 2}
+            x={padding}
+            y={y}
             width={width}
             height={ledHeight}
-            rx={2}
-            ry={2}
-            fill={on ? COLORS.bar : COLORS.barOff}
+            rx={2.5}
+            ry={2.5}
+            fill={COLORS.bar}
           />
         );
       })}

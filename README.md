@@ -52,10 +52,15 @@ src/
 
 ### Habillage
 
-Le grain du châssis vient d'une photo de la réplique, pas d'une banque
-d'images : `assets/TEXTURE.md` donne la source exacte et la commande qui l'a
-produit. Le vortex est vectoriel et animé par le pilote natif ; il tourne plus
-ou moins vite selon la phase du minuteur.
+La façade est noire : ce n'est pas le fond qui porte la matière, ce sont les
+pièces. La molette est une pièce tournée, avec collerette biseautée et face
+creusée ; les afficheurs horaires sont derrière une bande rétroéclairée ; les
+bargraphes sont encastrés dans des gouttières ; les touches ont un contour en
+biseau, clair en haut. Tout est vectoriel, donc net à n'importe quelle
+définition.
+
+Le vortex tourne en boucle au bout de l'objet, dans la zone restée vide de la
+façade, et sa cadence suit la tension du décompte.
 
 Trois choix structurent le reste.
 
@@ -120,9 +125,24 @@ jamais dans le dépôt, et aucun mot de passe ne doit apparaître dans
 `android.package` doit rester `com.sliderstimer` : c'est l'identifiant de la
 fiche Play existante.
 
-## Licence
+## Licence et droits
 
-MIT. Voir `LICENSE`.
+Le code est sous licence MIT. Voir `LICENSE`.
 
 *Sliders* est une marque de ses ayants droit. Ce projet est un hommage de fan,
 sans affiliation ni licence officielle.
+
+### ⚠️ Avant toute publication : `assets/vortex.mp4`
+
+Ce fichier est un extrait de la série. **Ces images ne sont pas libres de
+droits.** Les embarquer dans une application distribuée sur Google Play ou
+l'App Store expose à un retrait pour atteinte à la propriété intellectuelle —
+un risque d'autant moins théorique que l'application a déjà été retirée une
+fois.
+
+Pour une publication, remplacer la source de `VortexPortal` par un rendu
+original. Le reste de l'habillage est dessiné, donc sans exposition.
+
+La même prudence vaut pour l'icône et la fiche du magasin : pas de logo, pas
+de visuel de la série, et une description qui dit clairement « hommage de fan,
+non officiel ».

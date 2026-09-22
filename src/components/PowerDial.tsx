@@ -1,26 +1,28 @@
 import { memo, useMemo } from 'react';
 import { PanResponder, StyleSheet, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Circle, Defs, G, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 
 import { NEOPIXEL_COUNT } from '../hardware/layout';
 import { setKnob, toOpacity, useStrip } from '../hardware/strip';
 import { COLORS } from '../theme';
 
 /**
- * Potentiomètre d'alimentation et son arc lumineux.
+ * Molette d'alimentation et son arc lumineux.
  *
- * Sur la réplique, l'arc est un guide de lumière continu, pas une rangée de
- * points : les sept NeoPixel éclairent une même pièce translucide. C'est donc
- * un tracé progressif, et non des pastilles séparées.
+ * La molette est une pièce tournée : une collerette biseautée, éclairée en
+ * haut à gauche, et une face plus sombre creusée d'une fente. Tout est en
+ * dégradés — un aplat gris ne donne pas le relief.
  *
- * Le geste est capté par le cadre extérieur, qui ne tourne pas. L'écouter sur
- * le bouton lui-même faisait tourner le repère tactile avec lui, et la
- * rotation s'emballait.
+ * L'arc est un guide de lumière continu, plus vif à son sommet, doublé de deux
+ * passes translucides qui font le halo.
+ *
+ * Le geste est capté par le cadre extérieur, qui ne tourne pas : l'écouter sur
+ * la molette elle-même faisait tourner le repère tactile avec elle.
  */
 
 /** Amplitude de l'arc, en degrés, ouverture vers le bas. */
-const ARC_SPAN = 270;
-const ARC_START = -135;
+const ARC_SPAN = 250;
+const ARC_START = -125;
 
 /** Angle mesuré depuis midi, sens horaire. */
 const polar = (center: number, radius: number, angle: number) => {
@@ -46,9 +48,11 @@ function PowerDialView({ size }: PowerDialProps) {
   const { knob, level, brightness } = useStrip();
 
   const center = size / 2;
-  const stroke = Math.max(size * 0.055, 6);
-  const radius = center - stroke;
-  const knobSize = size * 0.6;
+  // L'arc court au bord, la molette occupe le reste.
+  const arcStroke = size * 0.044;
+  const arcRadius = center - arcStroke * 0.9;
+  const ringRadius = size * 0.375;
+  const faceRadius = ringRadius * 0.76;
 
   const panResponder = useMemo(
     () =>
@@ -73,78 +77,116 @@ function PowerDialView({ size }: PowerDialProps) {
     [center],
   );
 
-  const track = arcPath(center, radius, ARC_START, ARC_START + ARC_SPAN);
+  const track = arcPath(center, arcRadius, ARC_START, ARC_START + ARC_SPAN);
   const filledSpan = (ARC_SPAN * level) / NEOPIXEL_COUNT;
-  // Le bouton ne suit que la main de l'utilisateur : pendant une animation,
-  // seule la lumière bouge.
-  const knobAngle = ARC_START + (ARC_SPAN * knob) / NEOPIXEL_COUNT;
-  const fill = filledSpan > 0 ? arcPath(center, radius, ARC_START, ARC_START + filledSpan) : null;
+  const fill = filledSpan > 0 ? arcPath(center, arcRadius, ARC_START, ARC_START + filledSpan) : null;
   const glow = toOpacity(brightness);
+  const knobAngle = ARC_START + (ARC_SPAN * knob) / NEOPIXEL_COUNT;
+
+  const slotWidth = faceRadius * 1.62;
+  const slotHeight = faceRadius * 0.15;
 
   return (
     <View style={[styles.container, { width: size, height: size }]} {...panResponder.panHandlers}>
-      <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
+      <Svg width={size} height={size}>
+        <Defs>
+          {/* L'arc est plus chaud à son sommet : la lumière y est frontale. */}
+          <LinearGradient id="arc" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor={COLORS.stripHot} />
+            <Stop offset="0.45" stopColor={COLORS.strip} />
+            <Stop offset="1" stopColor="#8e0d0d" />
+          </LinearGradient>
+          {/* Collerette : éclairée en haut à gauche, dans l'ombre en bas. */}
+          <LinearGradient id="ring" x1="0.15" y1="0" x2="0.85" y2="1">
+            <Stop offset="0" stopColor={COLORS.knobRingLight} />
+            <Stop offset="0.5" stopColor="#262626" />
+            <Stop offset="1" stopColor={COLORS.knobRingDark} />
+          </LinearGradient>
+          {/* Face du bouton, creusée : plus sombre que la collerette. */}
+          <LinearGradient id="face" x1="0.2" y1="0" x2="0.8" y2="1">
+            <Stop offset="0" stopColor={COLORS.knobFaceLight} />
+            <Stop offset="0.55" stopColor="#1d1d1d" />
+            <Stop offset="1" stopColor={COLORS.knobFaceDark} />
+          </LinearGradient>
+          <LinearGradient id="slot" x1="0" y1="0" x2="0" y2="1">
+            <Stop offset="0" stopColor={COLORS.knobSlotEdge} />
+            <Stop offset="0.35" stopColor={COLORS.knobSlot} />
+            <Stop offset="1" stopColor="#0d0d0d" />
+          </LinearGradient>
+        </Defs>
+
+        {/* Gouttière de l'arc, éteinte */}
         <Path
           d={track}
           stroke={COLORS.stripOff}
-          strokeWidth={stroke}
+          strokeWidth={arcStroke}
           strokeLinecap="round"
           fill="none"
         />
+
         {fill !== null && (
           <>
-            {/* Halo : un tracé large et translucide sous le trait net. */}
+            {/* Deux passes larges et translucides : c'est le halo. */}
             <Path
               d={fill}
               stroke={COLORS.strip}
-              strokeWidth={stroke * 2.4}
+              strokeWidth={arcStroke * 3.2}
+              strokeOpacity={glow * 0.16}
+              strokeLinecap="round"
+              fill="none"
+            />
+            <Path
+              d={fill}
+              stroke={COLORS.strip}
+              strokeWidth={arcStroke * 1.9}
               strokeOpacity={glow * 0.3}
               strokeLinecap="round"
               fill="none"
             />
             <Path
               d={fill}
-              stroke={COLORS.strip}
-              strokeWidth={stroke}
+              stroke="url(#arc)"
+              strokeWidth={arcStroke}
               strokeOpacity={glow}
               strokeLinecap="round"
               fill="none"
             />
           </>
         )}
-      </Svg>
 
-      <View
-        pointerEvents="none"
-        style={[
-          styles.knob,
-          {
-            width: knobSize,
-            height: knobSize,
-            borderRadius: knobSize / 2,
-            transform: [{ rotate: `${knobAngle}deg` }],
-          },
-        ]}>
-        <View style={[styles.slot, { height: Math.max(knobSize * 0.05, 3) }]} />
-      </View>
+        {/* Collerette */}
+        <Circle cx={center} cy={center} r={ringRadius} fill="url(#ring)" />
+        {/* Arête vive au sommet de la collerette */}
+        <Circle
+          cx={center}
+          cy={center}
+          r={ringRadius}
+          stroke="rgba(255, 255, 255, 0.10)"
+          strokeWidth={1}
+          fill="none"
+        />
+
+        {/* Face, avec la fente qui suit la position de la molette */}
+        <G rotation={knobAngle} origin={`${center}, ${center}`}>
+          <Circle cx={center} cy={center} r={faceRadius} fill="url(#face)" />
+          <Rect
+            x={center - slotWidth / 2}
+            y={center - slotHeight / 2}
+            width={slotWidth}
+            height={slotHeight}
+            rx={slotHeight / 2}
+            ry={slotHeight / 2}
+            fill="url(#slot)"
+            transform={`rotate(45, ${center}, ${center})`}
+          />
+        </G>
+      </Svg>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { justifyContent: 'center', alignItems: 'center' },
-  knob: {
-    backgroundColor: COLORS.knob,
-    borderWidth: 6,
-    borderColor: COLORS.knobRing,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  slot: {
-    width: '78%',
-    backgroundColor: COLORS.knobRing,
-    borderRadius: 3,
-  },
 });
 
 export const PowerDial = memo(PowerDialView);

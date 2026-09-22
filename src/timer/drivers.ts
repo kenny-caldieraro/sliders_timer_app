@@ -319,9 +319,9 @@ export function useSetupBlink(state: TimerState) {
 /* ------------------------------------------------------------------ */
 
 /** Témoins forcés au fixe, selon le palier atteint en burnout. */
-type SolidFlags = { TAU: boolean; DELTA: boolean; ZETA: boolean; colon: boolean };
+type SolidFlags = { TAU: boolean; DELTA: boolean; ZETA: boolean };
 
-const NONE: SolidFlags = { TAU: false, DELTA: false, ZETA: false, colon: false };
+const NONE: SolidFlags = { TAU: false, DELTA: false, ZETA: false };
 
 /**
  * En burnout, `animation_burnout` fige certains témoins au lieu de les faire
@@ -336,7 +336,6 @@ function solidFlagsFor(state: TimerState): SolidFlags {
     ZETA: seconds >= 35 && seconds <= 59,
     TAU: seconds >= 15 && seconds <= 35,
     DELTA: seconds <= 15,
-    colon: seconds <= 5,
   };
 }
 
@@ -367,7 +366,7 @@ export function useStatusBlinkers(state: TimerState) {
       return;
     }
 
-    const flags = { TAU: false, DELTA: false, ZETA: false, colon: false };
+    const flags = { TAU: false, DELTA: false, ZETA: false };
 
     const tick = (key: keyof SolidFlags, apply: (on: boolean) => void) => () => {
       if (solid.current[key]) {
@@ -391,14 +390,54 @@ export function useStatusBlinkers(state: TimerState) {
         tick('ZETA', (on) => setStatusLed('ZETA', on)),
         BLINK_INTERVALS.green,
       ),
-      setInterval(tick('colon', setColons), BLINK_INTERVALS.colon),
     ];
 
-    return () => {
-      ids.forEach(clearInterval);
-      setColons(true);
-    };
+    return () => ids.forEach(clearInterval);
   }, [active]);
+}
+
+/** Phases où le minuteur est sous tension et affiche l'heure. */
+const isPowered = (phase: Phase) =>
+  phase === 'idle' || phase === 'setup' || phase === 'running' || phase === 'burnout';
+
+/**
+ * Battement des deux-points : deux fois par seconde dès que le minuteur est
+ * allumé. C'est le signe le plus simple que l'objet est vivant, donc il ne
+ * s'arrête pas entre deux décomptes.
+ *
+ * Sous cinq secondes de burnout, ils passent au fixe — le firmware fige alors
+ * tous les témoins.
+ */
+export function useColonBlink(state: TimerState) {
+  const powered = isPowered(state.phase);
+  const solid = useRef(false);
+
+  useEffect(() => {
+    solid.current = state.phase === 'burnout' && remainingSeconds(state) <= 5;
+  }, [state]);
+
+  useEffect(() => {
+    if (!powered) {
+      setColons(false);
+      return;
+    }
+    let on = true;
+    setColons(true);
+
+    const id = setInterval(() => {
+      if (solid.current) {
+        setColons(true);
+        return;
+      }
+      on = !on;
+      setColons(on);
+    }, BLINK_INTERVALS.colon);
+
+    return () => {
+      clearInterval(id);
+      setColons(false);
+    };
+  }, [powered]);
 }
 
 /* ------------------------------------------------------------------ */

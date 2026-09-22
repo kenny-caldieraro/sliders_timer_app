@@ -24,8 +24,8 @@ const LAMPS = [
   { column: 4, color: COLORS.vortexRed },
 ] as const;
 
-const HEIGHT = 26;
-const RADIUS = 7;
+const HEIGHT = 22;
+const RADIUS = 5;
 
 export type EmitterProps = {
   width: number;
