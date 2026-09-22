@@ -169,33 +169,40 @@ export function useSlideSequence(state: TimerState, dispatch: Dispatch) {
     runSequence(async () => {
       stopBeepPattern();
 
+      /*
+       * Les quatre lampes de l'émetteur.
+       *
+       * Les deux blanches du centre alternent dans les dernières secondes du
+       * décompte — c'est `useEmitter` qui s'en charge — puis passent au fixe.
+       * À l'ouverture du vortex, les deux rouges des extrémités les
+       * rejoignent : les quatre restent allumées, fixes, le temps du saut.
+       */
       if (forced) {
         playClip('slide');
-        // Ouverture du vortex : seules les deux rouges s'allument. Les
-        // blanches du centre servent à l'armement et au compte final.
-        setEmitter([true, false, false, true]);
+        setEmitter(ALL_LAMPS);
         customTone(TONES.lock, 1000);
         await sleep(1500, token);
-        setEmitter([false, false, false, false]);
         noTone();
 
         await playDisplayFade(token);
         await playGenser(token);
         await playDisplayWrap(token);
+        setEmitter(NO_LAMP);
       } else {
-        // Armement : les deux blanches du centre, puis le bip de
-        // verrouillage de 1,5 s avant le clip.
-        setEmitter([false, true, true, false]);
+        // Armement : les deux blanches, puis le bip de verrouillage de 1,5 s.
+        setEmitter(WHITE_LAMPS);
         customTone(TONES.lock, 1500);
         await sleep(1500, token);
-        setEmitter([false, false, false, false]);
 
+        // Le vortex s'ouvre : les rouges rejoignent les blanches.
         playClip('slide');
+        setEmitter(ALL_LAMPS);
         await playVortex(token);
 
         if (intent === 'expire') {
           await playCountdownEnd(token);
         }
+        setEmitter(NO_LAMP);
       }
 
       dispatch({
@@ -499,6 +506,14 @@ function bargraphTableFor(state: TimerState) {
 const END_SEGMENTS = 0x81;
 
 /**
+ * États des quatre lampes de l'émetteur, dans l'ordre des colonnes 1 à 4 :
+ * rouge, blanche, blanche, rouge.
+ */
+const NO_LAMP = [false, false, false, false] as const;
+const WHITE_LAMPS = [false, true, true, false] as const;
+const ALL_LAMPS = [true, true, true, true] as const;
+
+/**
  * Surcoût d'un tour de boucle Arduino.
  *
  * `animateBargraphe` attend `delayTime`, mais la boucle principale fait aussi
@@ -611,6 +626,12 @@ export function useEmitter(state: TimerState) {
       setLed(EMITTER_ROW.matrix, EMITTER_ROW.row, 3, false);
     };
 
+    // Pendant le saut et sur un minuteur mort, les lampes sont pilotées par
+    // les séquences. Cet effet s'exécute après elles : y toucher éteindrait
+    // aussitôt ce qu'elles viennent d'allumer.
+    if (state.phase === 'slide' || state.phase === 'dead') {
+      return;
+    }
     if (state.phase !== 'running') {
       off();
       return;
