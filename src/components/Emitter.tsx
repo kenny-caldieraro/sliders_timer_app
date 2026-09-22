@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import React, { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
@@ -66,19 +66,32 @@ function EmitterView({ width }: EmitterProps) {
           const lit = (row & columnMaskOf(lamp.column)) !== 0;
           const x = index * slotWidth;
           return (
-            <Rect
-              key={lamp.column}
-              x={x + 3}
-              y={3}
-              width={slotWidth - 6}
-              height={HEIGHT - 6}
-              rx={RADIUS - 2}
-              ry={RADIUS - 2}
-              fill={lit ? lamp.on : lamp.off}
-              // Les sources diffusent dans le guide : un bord franc ferait
-              // pastille, pas lampe.
-              fillOpacity={lit ? 0.92 : 1}
-            />
+            <React.Fragment key={lamp.column}>
+              {/* Halo : la source diffuse dans le guide et déborde sur ses
+                  voisines. Un bord franc ferait pastille, pas lampe. */}
+              {lit && (
+                <Rect
+                  x={x - slotWidth * 0.3}
+                  y={0}
+                  width={slotWidth * 1.6}
+                  height={HEIGHT}
+                  rx={RADIUS}
+                  ry={RADIUS}
+                  fill={lamp.on}
+                  fillOpacity={0.3}
+                />
+              )}
+              <Rect
+                x={x + 3}
+                y={3}
+                width={slotWidth - 6}
+                height={HEIGHT - 6}
+                rx={RADIUS - 2}
+                ry={RADIUS - 2}
+                fill={lit ? lamp.on : lamp.off}
+                fillOpacity={lit ? 0.95 : 1}
+              />
+            </React.Fragment>
           );
         })}
 

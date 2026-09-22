@@ -26,12 +26,63 @@ const STEPS: readonly string[] = [
 ];
 
 const BUTTONS: readonly Entry[] = [
-  { key: 'PWR', title: 'Alimentation', detail: 'Allume et éteint le minuteur. Répond toujours, même en plein décompte.' },
-  { key: 'FCN', title: 'Champ à régler', detail: 'Passe au champ suivant : secondes, minutes, heures, jours, puis sortie. Le champ en cours de réglage clignote.' },
+  {
+    key: 'PWR',
+    title: 'Alimentation',
+    detail:
+      "Allume et éteint le minuteur. Répond toujours, y compris en plein décompte et sur un minuteur bloqué.",
+  },
+  {
+    key: 'FCN',
+    title: 'Champ à régler',
+    detail:
+      'Passe au champ suivant : secondes, minutes, heures, jours, puis sortie. Le champ en cours de réglage clignote.',
+  },
   { key: '1', title: 'Augmenter', detail: 'Ajoute une unité au champ sélectionné.' },
   { key: '4', title: 'Diminuer', detail: 'Retire une unité au champ sélectionné.' },
-  { key: 'END', title: 'Saut', detail: 'Lance le décompte réglé. Pendant un décompte, provoque un saut anticipé vers une durée tirée au sort.' },
-  { key: 'NAME\nMENU', title: 'Burnout', detail: 'Force le saut et enclenche quatre-vingt-dix secondes de sursis. À la toute dernière seconde, un nouvel appui rattrape le coup.' },
+  {
+    key: 'END',
+    title: 'Lancer, ou sauter au hasard',
+    detail:
+      "À l'arrêt, lance le décompte réglé. Pendant un décompte, interrompt tout et repart sur une durée tirée au sort.",
+  },
+  {
+    key: 'NAME\nMENU',
+    title: 'Burnout',
+    detail:
+      "Pendant un décompte, force le saut et n'accorde plus que quatre-vingt-dix secondes de sursis. À la toute dernière seconde, un nouvel appui rattrape le coup et relance un décompte tiré au sort. Sinon le minuteur meurt.",
+  },
+];
+
+/** Les deux sauts se ressemblent : la notice doit les séparer clairement. */
+const JUMPS: readonly Entry[] = [
+  {
+    key: 'END',
+    title: 'Saut au hasard',
+    detail:
+      'Le décompte repart immédiatement sur une nouvelle durée, sans limite de temps. Le minuteur reste en fonctionnement normal.',
+  },
+  {
+    key: 'NAME\nMENU',
+    title: 'Saut forcé, puis burnout',
+    detail:
+      "Le décompte est remplacé par quatre-vingt-dix secondes de sursis. Les paliers sonores s'enchaînent, les témoins passent au fixe l'un après l'autre. C'est un compte à rebours de survie, pas un décompte ordinaire.",
+  },
+];
+
+/** Ce que disent les quatre lampes du bandeau supérieur. */
+const LAMPS: readonly Entry[] = [
+  {
+    key: 'BLANCHES',
+    title: 'Les deux du centre',
+    detail:
+      "S'allument à l'armement, juste avant le saut. Elles alternent ensuite dans les six dernières secondes du décompte, puis restent allumées toutes les deux sous deux secondes.",
+  },
+  {
+    key: 'ROUGES',
+    title: 'Les deux des extrémités',
+    detail: "Ne s'allument qu'à l'ouverture du vortex, au moment du saut forcé.",
+  },
 ];
 
 export type HelpSheetProps = {
@@ -68,6 +119,36 @@ function HelpSheetView({ visible, onClose }: HelpSheetProps) {
 
             <Text style={[styles.sectionTitle, styles.sectionSpacing]}>Les commandes</Text>
             {BUTTONS.map((entry) => (
+              <View key={entry.key} style={styles.row}>
+                <View style={styles.glyph}>
+                  <Text style={styles.glyphText}>{entry.key}</Text>
+                </View>
+                <View style={styles.rowText}>
+                  <Text style={styles.rowTitle}>{entry.title}</Text>
+                  <Text style={styles.rowDetail}>{entry.detail}</Text>
+                </View>
+              </View>
+            ))}
+
+            <Text style={[styles.sectionTitle, styles.sectionSpacing]}>
+              Les deux sauts
+            </Text>
+            {JUMPS.map((entry) => (
+              <View key={entry.key} style={styles.row}>
+                <View style={styles.glyph}>
+                  <Text style={styles.glyphText}>{entry.key}</Text>
+                </View>
+                <View style={styles.rowText}>
+                  <Text style={styles.rowTitle}>{entry.title}</Text>
+                  <Text style={styles.rowDetail}>{entry.detail}</Text>
+                </View>
+              </View>
+            ))}
+
+            <Text style={[styles.sectionTitle, styles.sectionSpacing]}>
+              Les lampes du bandeau
+            </Text>
+            {LAMPS.map((entry) => (
               <View key={entry.key} style={styles.row}>
                 <View style={styles.glyph}>
                   <Text style={styles.glyphText}>{entry.key}</Text>

@@ -171,7 +171,9 @@ export function useSlideSequence(state: TimerState, dispatch: Dispatch) {
 
       if (forced) {
         playClip('slide');
-        setEmitter([true, true, true, true]);
+        // Ouverture du vortex : seules les deux rouges s'allument. Les
+        // blanches du centre servent à l'armement et au compte final.
+        setEmitter([true, false, false, true]);
         customTone(TONES.lock, 1000);
         await sleep(1500, token);
         setEmitter([false, false, false, false]);
@@ -181,7 +183,8 @@ export function useSlideSequence(state: TimerState, dispatch: Dispatch) {
         await playGenser(token);
         await playDisplayWrap(token);
       } else {
-        // LED de l'émetteur, puis bip de verrouillage de 1,5 s avant le clip.
+        // Armement : les deux blanches du centre, puis le bip de
+        // verrouillage de 1,5 s avant le clip.
         setEmitter([false, true, true, false]);
         customTone(TONES.lock, 1500);
         await sleep(1500, token);
