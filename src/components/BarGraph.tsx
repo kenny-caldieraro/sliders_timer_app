@@ -55,6 +55,32 @@ function BarGraphView({ cell, width, ledHeight, gap = 4 }: BarGraphProps) {
         fill={`url(#${gradientId})`}
       />
 
+      {/*
+        Halo : un segment allumé diffuse dans le diffuseur, il ne s'arrête pas
+        net au bord. Deux passes translucides plus larges que le segment
+        suffisent à le rendre, sans le coût d'un filtre.
+      */}
+      {Array.from({ length: 8 }, (_, index) => {
+        const on = !dimmed && (value & columnMaskOf(index)) !== 0;
+        if (!on) {
+          return null;
+        }
+        const y = padding + index * pitch;
+        return (
+          <Rect
+            key={`glow-${index}`}
+            x={0}
+            y={y - padding * 0.8}
+            width={totalWidth}
+            height={ledHeight + padding * 1.6}
+            rx={4}
+            ry={4}
+            fill={COLORS.bar}
+            fillOpacity={0.3}
+          />
+        );
+      })}
+
       {Array.from({ length: 8 }, (_, index) => {
         const on = !dimmed && (value & columnMaskOf(index)) !== 0;
         const y = padding + index * pitch;

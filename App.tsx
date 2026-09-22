@@ -53,14 +53,14 @@ const LAYOUT = {
 /**
  * Les chiffres remplissent presque toute la bande, en hauteur comme en
  * largeur : c'est ce qui donne l'afficheur massif de la façade. Un afficheur
- * est 0,7 fois plus large que haut, six d'affilée plus deux séparateurs
- * font 4,62 fois cette hauteur.
+ * est 0,656 fois plus large que haut, six d'affilée plus deux séparateurs
+ * font 4,35 fois cette hauteur.
  */
-const DIGIT_IN_BAND = 0.94;
-const DIGIT_ROW_RATIO = 6 * 0.7 + 0.42;
+const DIGIT_IN_BAND = 0.82;
+const DIGIT_ROW_RATIO = 6 * 0.656 + 0.42;
 
 /** Hauteur de la barre de l'émetteur, au-dessus de tout le reste. */
-const EMITTER_HEIGHT = 20;
+const EMITTER_HEIGHT = 26;
 
 function Timer() {
   const { width, height } = useWindowDimensions();
@@ -78,7 +78,7 @@ function Timer() {
   const bandHeight = block(LAYOUT.band);
   const timeDigit = Math.min(
     bandHeight * DIGIT_IN_BAND,
-    (width * 0.98) / DIGIT_ROW_RATIO,
+    (width * 0.9) / DIGIT_ROW_RATIO,
   );
   const dialSize = block(LAYOUT.dial);
   const daysHeight = block(LAYOUT.days);
@@ -151,8 +151,15 @@ function Timer() {
 
         <View style={{ height: block(LAYOUT.gapAfterBand) }} />
 
-        {/* Témoins et bargraphes */}
-        <View style={[styles.indicators, { height: barHeight }]}>
+        {/*
+          Témoins et bargraphes. Largeurs relevées sur la façade, en fraction
+          de la largeur d'écran : gouttière 11,5 %, témoin 8 %, échelon 5 %.
+        */}
+        <View
+          style={[
+            styles.indicators,
+            { height: barHeight, paddingLeft: width * 0.11, paddingRight: width * 0.09 },
+          ]}>
           <View style={[styles.statusColumn, { height: barHeight * 0.9 }]}>
             {STATUS_LEDS.map((led) => (
               <StatusLed
@@ -160,25 +167,25 @@ function Timer() {
                 label={led.label}
                 column={led.column}
                 color={led.color}
-                width={width * 0.1}
+                width={width * 0.08}
               />
             ))}
           </View>
           <View style={styles.bargraphs}>
             <BarGraph
               cell={BARGRAPH_LEFT}
-              width={width * 0.072}
+              width={width * 0.095}
               ledHeight={(barHeight - 8 - 7 * 5) / 8}
               gap={5}
             />
             <View style={[styles.ladder, { height: barHeight * 0.86 }]}>
               {Array.from({ length: 13 }, (_, index) => (
-                <View key={index} style={[styles.rung, { width: width * 0.03 }]} />
+                <View key={index} style={[styles.rung, { width: width * 0.05 }]} />
               ))}
             </View>
             <BarGraph
               cell={BARGRAPH_RIGHT}
-              width={width * 0.072}
+              width={width * 0.095}
               ledHeight={(barHeight - 8 - 7 * 5) / 8}
               gap={5}
             />
@@ -294,10 +301,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
-    paddingHorizontal: 16,
   },
   statusColumn: { justifyContent: 'space-between' },
-  bargraphs: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  bargraphs: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   ladder: { alignItems: 'center', justifyContent: 'space-between' },
   rung: { height: 2, borderRadius: 1, backgroundColor: COLORS.ladder },
   // Le pavé 1 / 4 est sur une platine rapportée, légèrement plus claire.

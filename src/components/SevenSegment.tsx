@@ -11,7 +11,7 @@ import { SEG_A, SEG_B, SEG_C, SEG_D, SEG_DP, SEG_E, SEG_F, SEG_G } from '../hard
  * segments brut : c'est ce qui permet de rejouer les images d'animation du
  * firmware, dont la plupart ne correspondent à aucun caractère.
  *
- * Géométrie : segments hexagonaux à pointes, dans une boîte de 126 × 180.
+ * Géométrie : segments hexagonaux à pointes, dans une boîte de 118 × 180.
  *
  * Le rapport largeur/hauteur est volontairement proche de 1 : c'est celui des
  * afficheurs du minuteur, qui sont larges et trapus. Une boîte étroite — le
@@ -19,13 +19,13 @@ import { SEG_A, SEG_B, SEG_C, SEG_D, SEG_DP, SEG_E, SEG_F, SEG_G } from '../hard
  * qui ne remplissent jamais la bande.
  */
 
-const VIEW_WIDTH = 126;
+const VIEW_WIDTH = 118;
 const VIEW_HEIGHT = 180;
 /** Largeur occupée par les segments ; le reste est réservé au point. */
-const BODY_WIDTH = 112;
+const BODY_WIDTH = 104;
 export const SEGMENT_ASPECT = VIEW_WIDTH / VIEW_HEIGHT;
 
-const THICKNESS = 20;
+const THICKNESS = 18;
 const GAP = 5;
 
 /** Segment horizontal : hexagone à pointes gauche et droite. */

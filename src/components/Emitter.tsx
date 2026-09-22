@@ -18,13 +18,13 @@ import { COLORS } from '../theme';
 
 /** Ordre des quatre sources, de gauche à droite. */
 const LAMPS = [
-  { column: 1, color: COLORS.vortexRed },
-  { column: 2, color: COLORS.vortexWhite },
-  { column: 3, color: COLORS.vortexWhite },
-  { column: 4, color: COLORS.vortexRed },
+  { column: 1, on: COLORS.vortexRed, off: '#2a1010' },
+  { column: 2, on: COLORS.vortexWhite, off: '#232323' },
+  { column: 3, on: COLORS.vortexWhite, off: '#232323' },
+  { column: 4, on: COLORS.vortexRed, off: '#2a1010' },
 ] as const;
 
-const HEIGHT = 22;
+const HEIGHT = 26;
 const RADIUS = 5;
 
 export type EmitterProps = {
@@ -57,25 +57,27 @@ function EmitterView({ width }: EmitterProps) {
           fill="url(#emitterBody)"
         />
 
-        {LAMPS.map(({ column, color }, index) => {
-          const on = (row & columnMaskOf(column)) !== 0;
-          if (!on) {
-            return null;
-          }
+        {/*
+          Les quatre lampes sont toujours dessinées, sombres quand elles sont
+          éteintes : sur l'objet on les voit derrière le guide même au repos.
+          Ne les tracer qu'allumées laissait une barre vide.
+        */}
+        {LAMPS.map((lamp, index) => {
+          const lit = (row & columnMaskOf(lamp.column)) !== 0;
           const x = index * slotWidth;
           return (
             <Rect
-              key={column}
-              x={x + 2}
-              y={2}
-              width={slotWidth - 4}
-              height={HEIGHT - 4}
+              key={lamp.column}
+              x={x + 3}
+              y={3}
+              width={slotWidth - 6}
+              height={HEIGHT - 6}
               rx={RADIUS - 2}
               ry={RADIUS - 2}
-              fill={color}
+              fill={lit ? lamp.on : lamp.off}
               // Les sources diffusent dans le guide : un bord franc ferait
               // pastille, pas lampe.
-              fillOpacity={0.92}
+              fillOpacity={lit ? 0.92 : 1}
             />
           );
         })}
