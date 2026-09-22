@@ -488,8 +488,12 @@ function bargraphTableFor(state: TimerState) {
 /**
  * Segments d'extrémité d'un bargraphe : colonnes 0 et 7, soit les bits de
  * poids fort et faible du registre.
+ *
+ * Ils restent allumés tant que le minuteur est sous tension — au repos comme
+ * pendant l'animation. Ce sont les témoins d'alimentation de la façade, pas
+ * des segments de mesure : l'animation ne pilote que les six du milieu.
  */
-const REST_PATTERN = 0x81;
+const END_SEGMENTS = 0x81;
 
 /**
  * Surcoût d'un tour de boucle Arduino.
@@ -519,7 +523,7 @@ export function useBargraph(state: TimerState) {
       // Au repos, les deux segments d'extrémité restent allumés : c'est le
       // témoin « sous tension » de la façade. Éteindre complètement les
       // gouttières donnerait un objet mort alors qu'il attend un réglage.
-      const resting = powered ? REST_PATTERN : 0;
+      const resting = powered ? END_SEGMENTS : 0;
       setRow(BARGRAPH_LEFT.matrix, BARGRAPH_LEFT.row, resting);
       setRow(BARGRAPH_RIGHT.matrix, BARGRAPH_RIGHT.row, resting);
       return;
@@ -535,8 +539,10 @@ export function useBargraph(state: TimerState) {
       if (frame) {
         // `displayImage` écrit ces octets colonne par colonne : le bit 0 part
         // sur la colonne 0, qui est le bit de poids fort du registre.
-        setRow(BARGRAPH_LEFT.matrix, BARGRAPH_LEFT.row, reverseBits(frame[0]));
-        setRow(BARGRAPH_RIGHT.matrix, BARGRAPH_RIGHT.row, reverseBits(frame[1]));
+        // Les extrémités sont forcées par-dessus : elles ne s'éteignent pas
+        // sur les images où la table les laisse à zéro.
+        setRow(BARGRAPH_LEFT.matrix, BARGRAPH_LEFT.row, reverseBits(frame[0]) | END_SEGMENTS);
+        setRow(BARGRAPH_RIGHT.matrix, BARGRAPH_RIGHT.row, reverseBits(frame[1]) | END_SEGMENTS);
       }
       raf = requestAnimationFrame(step);
     };
