@@ -88,6 +88,15 @@ function Timer() {
 
   // Deux touches et leur écart dans la platine du pavé.
   const largeKeyHeight = (keypadHeight - 18) / 2;
+
+  /*
+   * Dimensions d'une LED, communes aux bargraphes et aux témoins latéraux :
+   * sur la façade ce sont les mêmes composants derrière le même diffuseur.
+   * Huit segments et sept écarts doivent tenir dans la hauteur du bloc.
+   */
+  const ledGap = 5;
+  const ledWidth = width * 0.095;
+  const ledHeight = (barHeight - 8 - 7 * ledGap) / 8;
   const portalHeight = Math.max(height * 0.07, 54);
 
   const isOn = state.phase !== 'off';
@@ -167,16 +176,17 @@ function Timer() {
                 label={led.label}
                 column={led.column}
                 color={led.color}
-                width={width * 0.08}
+                width={ledWidth}
+                height={ledHeight}
               />
             ))}
           </View>
           <View style={styles.bargraphs}>
             <BarGraph
               cell={BARGRAPH_LEFT}
-              width={width * 0.095}
-              ledHeight={(barHeight - 8 - 7 * 5) / 8}
-              gap={5}
+              width={ledWidth}
+              ledHeight={ledHeight}
+              gap={ledGap}
             />
             <View style={[styles.ladder, { height: barHeight * 0.86 }]}>
               {Array.from({ length: 13 }, (_, index) => (
@@ -185,9 +195,9 @@ function Timer() {
             </View>
             <BarGraph
               cell={BARGRAPH_RIGHT}
-              width={width * 0.095}
-              ledHeight={(barHeight - 8 - 7 * 5) / 8}
-              gap={5}
+              width={ledWidth}
+              ledHeight={ledHeight}
+              gap={ledGap}
             />
           </View>
         </View>

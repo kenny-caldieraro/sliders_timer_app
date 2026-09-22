@@ -12,7 +12,6 @@ import {
   playDisplayFade,
   playDisplayWrap,
   playGenser,
-  playScrollVersion,
   playSecondTick,
   playVortex,
   playWormholeOpening,
@@ -80,8 +79,12 @@ const isPowered = (phase: Phase) =>
 
 /**
  * Séquence d'allumage, reprise de `normal()` au premier double-clic power :
- * défilement de version (premier allumage seulement), clip d'activation,
- * GENSER, puis l'effet « wrap ».
+ * clip d'activation au premier allumage, GENSER, puis l'effet « wrap ».
+ *
+ * Le firmware fait d'abord défiler « sliders timer replica by kenny v1.2 »
+ * sur les afficheurs. C'est retiré ici : l'écran de titre casse l'illusion de
+ * l'objet, qui doit s'allumer comme un appareil, pas comme un logiciel.
+ * Le texte et son défilement restent disponibles dans `animations/frames.ts`.
  */
 export function useBootSequence(state: TimerState, dispatch: Dispatch) {
   const isFirstBoot = useRef(true);
@@ -106,7 +109,6 @@ export function useBootSequence(state: TimerState, dispatch: Dispatch) {
 
       if (isFirstBoot.current) {
         isFirstBoot.current = false;
-        await playScrollVersion(token);
         playClip('activation');
         await sleep(BOOT_INTRO_DELAY_MS, token);
       }

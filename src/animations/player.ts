@@ -8,13 +8,10 @@ import {
 } from '../hardware/layout';
 import { releaseLevel, setBrightness, setLevel } from '../hardware/strip';
 import {
-  CHAR_TO_SEGMENTS,
   DISPLAY_FADE_FRAMES,
   DISPLAY_WRAP_FRAMES,
   GENSER_FRAMES,
   GENSER_TONE,
-  VERSION_SCROLL_MS,
-  VERSION_TEXT,
   WRAP_BURNOUT_FRAMES,
   WRAP_BURNOUT_FRAME_MS,
   WRAP_BURNOUT_M1,
@@ -131,23 +128,6 @@ export async function playWrapBurnout(token: CancelToken) {
     setRows(0, frame);
     await sleep(WRAP_BURNOUT_FRAME_MS, token);
   }
-}
-
-/** Texte défilant du tout premier allumage. */
-export async function playScrollVersion(token: CancelToken) {
-  const toSegments = (char: string | undefined) => CHAR_TO_SEGMENTS[char ?? ' '] ?? 0x00;
-
-  for (let position = 0; position <= VERSION_TEXT.length - 9; position += 1) {
-    for (let index = 0; index < 6; index += 1) {
-      setRow(0, index, toSegments(VERSION_TEXT[position + index]));
-    }
-    for (let index = 0; index < 3; index += 1) {
-      setRow(1, index, toSegments(VERSION_TEXT[position + 6 + index]));
-    }
-    await sleep(VERSION_SCROLL_MS, token);
-  }
-  clearDisplay(0);
-  clearDisplay(1);
 }
 
 /** Segments parcourus par la rotation du vortex : A, B, C, D, E, F. */
