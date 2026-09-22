@@ -186,8 +186,12 @@ ce qui est normal — chaque magasin a son propre espace de noms.
 | `icones/app-store-1024.png` | 1024 × 1024, sans alpha | Icône App Store. Apple refuse la transparence et les coins arrondis. |
 | `icones/google-play-512.png` | 512 × 512 | Icône Play. |
 | `banniere/google-play-1024x500.png` | 1024 × 500, sans alpha | Image mise en avant de la fiche Play. Play la recadre selon les emplacements : rien d'essentiel n'est placé près des bords. |
-| `app-store-6.9/` | 1320 × 2868 | Quatre captures App Store. |
+| `app-store-6.9/` | 1320 × 2868 | Gabarit 6,9 pouces. |
+| `app-store-6.5/` | 1242 × 2688 | Gabarit 6,5 pouces. **C'est celui qu'attend la fiche existante** : App Store Connect refuse le 6,9 dans un emplacement configuré en 6,5. |
 | `google-play-phone/` | 1434 × 2868 | Les mêmes, complétées en noir jusqu'à 2:1. |
+
+Les trois jeux sont composés à la même échelle relative, pas redimensionnés
+les uns depuis les autres : le texte reste net à chaque définition.
 
 ## À remplir vous-même
 
