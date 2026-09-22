@@ -23,7 +23,7 @@ import {
 import { TONES, customTone, noTone } from '../audio/buzzer';
 import { playClip, stopAllClips } from '../audio/clips';
 import { applyBeepPattern, patternForRemaining, stopBeepPattern } from '../audio/patterns';
-import { clearAll, setLed, setRow } from '../hardware/display';
+import { clearAll, reverseBits, setLed, setRow } from '../hardware/display';
 import {
   BARGRAPH_LEFT,
   BARGRAPH_RIGHT,
@@ -42,8 +42,8 @@ import {
   breathe,
   clearStrip,
   periodForRemaining,
+  releaseLevel,
   setBrightness,
-  setLevel,
 } from '../hardware/strip';
 import { remainingSeconds } from './format';
 import {
@@ -424,6 +424,17 @@ function bargraphTableFor(state: TimerState) {
 }
 
 /**
+ * Surcoût d'un tour de boucle Arduino.
+ *
+ * `animateBargraphe` attend `delayTime`, mais la boucle principale fait aussi
+ * son propre `delay(10)` et tout le reste du travail entre deux images :
+ * lecture des boutons, `showTime`, potentiomètre, clignotements. La cadence
+ * réelle sur l'objet est donc nettement plus lente que la valeur nominale, et
+ * la reproduire à la lettre donne un défilement bien trop nerveux.
+ */
+const LOOP_OVERHEAD_MS = 35;
+
+/**
  * Animation des deux bargraphes.
  *
  * L'image est choisie par le temps écoulé plutôt qu'incrémentée à chaque
@@ -441,15 +452,18 @@ export function useBargraph(state: TimerState) {
       return;
     }
 
+    const frameMs = table.delayMs + LOOP_OVERHEAD_MS;
     const start = Date.now();
     let raf: ReturnType<typeof requestAnimationFrame>;
 
     const step = () => {
-      const index = Math.floor((Date.now() - start) / table.delayMs) % table.frames.length;
+      const index = Math.floor((Date.now() - start) / frameMs) % table.frames.length;
       const frame = table.frames[index] as BargraphFrame | undefined;
       if (frame) {
-        setRow(BARGRAPH_LEFT.matrix, BARGRAPH_LEFT.row, frame[0]);
-        setRow(BARGRAPH_RIGHT.matrix, BARGRAPH_RIGHT.row, frame[1]);
+        // `displayImage` écrit ces octets colonne par colonne : le bit 0 part
+        // sur la colonne 0, qui est le bit de poids fort du registre.
+        setRow(BARGRAPH_LEFT.matrix, BARGRAPH_LEFT.row, reverseBits(frame[0]));
+        setRow(BARGRAPH_RIGHT.matrix, BARGRAPH_RIGHT.row, reverseBits(frame[1]));
       }
       raf = requestAnimationFrame(step);
     };
@@ -493,7 +507,9 @@ export function useStripPulse(state: TimerState) {
     const start = Date.now();
     let raf: ReturnType<typeof requestAnimationFrame>;
 
-    setLevel(counting ? 7 : 5);
+    // La respiration ne joue que sur la luminosité : le nombre de segments
+    // allumés reste celui du potentiomètre, comme dans `pulseNeoPixel`.
+    releaseLevel();
 
     const step = () => {
       setBrightness(breathe(Date.now() - start, period, range.min, range.max));

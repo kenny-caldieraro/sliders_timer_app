@@ -20,7 +20,9 @@ octet pour octet.
 | **END** | Lance le saut. Pendant un décompte, provoque un saut anticipé vers une durée tirée au sort |
 | **NAME / MENU** | Force le saut et bascule en burnout |
 
-Le potentiomètre se tourne au doigt et pilote l'arc de sept LED.
+Le potentiomètre se tourne au doigt et pilote l'arc lumineux. Un bouton **?**
+en haut à gauche ouvre la notice : les sigles du prop ne parlent qu'à qui a
+l'objet en main.
 
 Sur la réplique matérielle, le burnout a son propre bouton. L'application n'a
 que six touches, dont **NAME / MENU** qui ne servait à rien : elle garde la
@@ -47,6 +49,13 @@ src/
   timer/        la machine à états et ses pilotes
   components/   le rendu SVG des matrices
 ```
+
+### Habillage
+
+Le grain du châssis vient d'une photo de la réplique, pas d'une banque
+d'images : `assets/TEXTURE.md` donne la source exacte et la commande qui l'a
+produit. Le vortex est vectoriel et animé par le pilote natif ; il tourne plus
+ou moins vite selon la phase du minuteur.
 
 Trois choix structurent le reste.
 

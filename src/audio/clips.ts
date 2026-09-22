@@ -1,4 +1,9 @@
-import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-audio';
+import {
+  createAudioPlayer,
+  setAudioModeAsync,
+  setIsAudioActiveAsync,
+  type AudioPlayer,
+} from 'expo-audio';
 
 /**
  * Clips sonores de la réplique.
@@ -8,9 +13,9 @@ import { createAudioPlayer, setAudioModeAsync, type AudioPlayer } from 'expo-aud
  *   bip        = 0002.mp3, le bip court (0,2 s)
  *   activation = 0003.mp3, le clip d'activation (6,4 s)
  *
- * Les lecteurs sont créés une fois et réutilisés. L'ancienne version rejouait
- * `play()` sur le même objet cinquante fois par seconde sans jamais l'arrêter,
- * ce qui saturait le pool audio d'Android.
+ * Les lecteurs sont créés une fois au démarrage, pas à la première lecture :
+ * un lecteur créé et joué dans la foulée n'a pas fini de charger, et le son
+ * ne sort jamais.
  */
 
 const SOURCES = {
@@ -28,52 +33,70 @@ export const CLIP_DURATION_MS: Record<ClipName, number> = {
   activation: 6426,
 };
 
+const NAMES = Object.keys(SOURCES) as ClipName[];
+
 let players: Partial<Record<ClipName, AudioPlayer>> = {};
-let ready = false;
+let initialising: Promise<void> | null = null;
 
-/** Prépare la sortie audio. À appeler une fois au démarrage. */
-export async function initClips() {
-  if (ready) {
-    return;
-  }
-  ready = true;
-  try {
-    await setAudioModeAsync({
-      playsInSilentMode: true,
-      shouldPlayInBackground: false,
-      interruptionMode: 'mixWithOthers',
-      allowsRecording: false,
-    });
-  } catch {
-    // Le mode audio n'a pas pu être appliqué : on joue quand même.
-  }
-}
-
-const playerFor = (name: ClipName): AudioPlayer | null => {
-  const existing = players[name];
-  if (existing) {
-    return existing;
-  }
-  try {
-    const player = createAudioPlayer(SOURCES[name]);
-    players[name] = player;
-    return player;
-  } catch {
-    return null;
+/** Un échec audio ne doit pas casser le minuteur, mais doit rester visible. */
+const report = (context: string, error: unknown) => {
+  if (__DEV__) {
+    console.warn(`[audio] ${context}`, error);
   }
 };
 
+/**
+ * Prépare la sortie audio et charge les trois clips.
+ * Idempotent : les appels suivants attendent la même initialisation.
+ */
+export function initClips(): Promise<void> {
+  if (initialising !== null) {
+    return initialising;
+  }
+
+  initialising = (async () => {
+    try {
+      await setAudioModeAsync({
+        // Le minuteur doit s'entendre même si le téléphone est en silencieux :
+        // c'est un minuteur, son intérêt est de prévenir.
+        playsInSilentMode: true,
+        shouldPlayInBackground: false,
+        interruptionMode: 'mixWithOthers',
+        allowsRecording: false,
+      });
+      await setIsAudioActiveAsync(true);
+    } catch (error) {
+      report("configuration de la session audio", error);
+    }
+
+    NAMES.forEach((name) => {
+      try {
+        players[name] = createAudioPlayer(SOURCES[name]);
+      } catch (error) {
+        report(`création du lecteur « ${name} »`, error);
+      }
+    });
+  })();
+
+  return initialising;
+}
+
 /** Joue un clip depuis le début. */
 export function playClip(name: ClipName) {
-  const player = playerFor(name);
+  const player = players[name];
   if (!player) {
+    report(`lecteur « ${name} » indisponible`, new Error('non initialisé'));
     return;
   }
   try {
-    player.seekTo(0).catch(() => undefined);
+    // On ne rembobine que si le lecteur a déjà servi : un `seekTo` sur un
+    // lecteur qui n'a pas fini de charger échoue silencieusement.
+    if (player.currentTime > 0) {
+      player.seekTo(0).catch((error) => report(`rembobinage de « ${name} »`, error));
+    }
     player.play();
-  } catch {
-    // Lecteur invalidé : il sera recréé au prochain appel.
+  } catch (error) {
+    report(`lecture de « ${name} »`, error);
     delete players[name];
   }
 }
@@ -86,25 +109,30 @@ export function stopClip(name: ClipName) {
   }
   try {
     player.pause();
-    player.seekTo(0).catch(() => undefined);
-  } catch {
+  } catch (error) {
+    report(`arrêt de « ${name} »`, error);
     delete players[name];
   }
 }
 
 /** Arrête tous les clips. */
 export function stopAllClips() {
-  (Object.keys(players) as ClipName[]).forEach(stopClip);
+  NAMES.forEach(stopClip);
 }
 
 /** Libère les lecteurs quand l'application se met en veille. */
 export function releaseClips() {
-  (Object.values(players) as AudioPlayer[]).forEach((player) => {
+  NAMES.forEach((name) => {
+    const player = players[name];
+    if (!player) {
+      return;
+    }
     try {
       player.remove();
-    } catch {
-      // Déjà libéré.
+    } catch (error) {
+      report(`libération de « ${name} »`, error);
     }
   });
   players = {};
+  initialising = null;
 }

@@ -17,6 +17,33 @@ import type { MatrixIndex } from './layout';
  * qu'une séquence portée depuis le firmware se relise ligne pour ligne.
  */
 
+/**
+ * Masque d'une colonne.
+ *
+ * `LedControl::setLed` adresse la colonne 0 par le bit de poids fort
+ * (`B10000000 >> column`), et non par le bit 0. Respecter cette convention
+ * est indispensable : les images de bargraphe du firmware sont écrites
+ * colonne par colonne, et les prendre à l'envers les affiche en miroir.
+ */
+export const columnMask = (column: number) => 0x80 >> column;
+
+/**
+ * Inverse l'ordre des bits d'un octet.
+ *
+ * `displayImage` lit le bit `n` de l'image et l'écrit sur la colonne `n`,
+ * qui vaut le bit `7 - n` du registre. Écrire l'octet renversé en une fois
+ * revient exactement au même, pour un huitième des appels.
+ */
+export function reverseBits(value: number): number {
+  let input = value & 0xff;
+  let output = 0;
+  for (let i = 0; i < 8; i += 1) {
+    output = (output << 1) | (input & 1);
+    input >>= 1;
+  }
+  return output;
+}
+
 const MATRIX_COUNT = 2;
 const ROW_COUNT = 8;
 const MAX_INTENSITY = 15;
@@ -70,7 +97,7 @@ export function setLed(matrix: MatrixIndex, row: number, column: number, on: boo
   if (!target || row < 0 || row >= ROW_COUNT || column < 0 || column > 7) {
     return;
   }
-  const mask = 1 << column;
+  const mask = columnMask(column);
   const current = target[row] ?? 0;
   const next = on ? current | mask : current & ~mask;
   if (current === next) {
@@ -147,7 +174,7 @@ export function useRow(matrix: MatrixIndex, row: number): number {
 
 /** S'abonne à une LED isolée. */
 export function useLed(matrix: MatrixIndex, row: number, column: number): boolean {
-  return (useRow(matrix, row) & (1 << column)) !== 0;
+  return (useRow(matrix, row) & columnMask(column)) !== 0;
 }
 
 /** Luminosité et état d'extinction des matrices. */

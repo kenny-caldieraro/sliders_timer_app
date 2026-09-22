@@ -6,7 +6,7 @@ import {
   NEOPIXEL_COUNT,
   SECONDS,
 } from '../hardware/layout';
-import { setBrightness, setLevel } from '../hardware/strip';
+import { releaseLevel, setBrightness, setLevel } from '../hardware/strip';
 import {
   CHAR_TO_SEGMENTS,
   DISPLAY_FADE_FRAMES,
@@ -206,7 +206,7 @@ export async function playVortex(token: CancelToken) {
 
   clearDisplay(0);
   clearDisplay(1);
-  setLevel(0);
+  releaseLevel();
   setBrightness(0);
 }
 
@@ -230,7 +230,7 @@ export async function playCountdownEnd(token: CancelToken) {
     noTone();
     await sleep(150, token);
   }
-  setLevel(0);
+  releaseLevel();
   noTone();
 }
 
@@ -277,7 +277,7 @@ export async function playWormholeOpening(token: CancelToken) {
     setBrightness(brightness);
     await sleep(50, token);
   }
-  setLevel(0);
+  releaseLevel();
   setBrightness(0);
 }
 

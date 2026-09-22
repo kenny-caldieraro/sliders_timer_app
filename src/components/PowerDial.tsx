@@ -1,31 +1,54 @@
 import { memo, useMemo } from 'react';
 import { PanResponder, StyleSheet, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
 import { NEOPIXEL_COUNT } from '../hardware/layout';
-import { setLevel, useStrip } from '../hardware/strip';
+import { setKnob, toOpacity, useStrip } from '../hardware/strip';
 import { COLORS } from '../theme';
 
 /**
- * Potentiomètre d'alimentation et son arc de sept LED.
+ * Potentiomètre d'alimentation et son arc lumineux.
  *
- * L'original mesurait le bouton à chaque mouvement du doigt via un
- * `measure()` asynchrone, ce qui donnait une rotation qui décroche. Ici on
- * lit les coordonnées du toucher relatives au bouton lui-même : le centre est
- * connu d'avance, il n'y a plus rien à mesurer.
+ * Sur la réplique, l'arc est un guide de lumière continu, pas une rangée de
+ * points : les sept NeoPixel éclairent une même pièce translucide. C'est donc
+ * un tracé progressif, et non des pastilles séparées.
+ *
+ * Le geste est capté par le cadre extérieur, qui ne tourne pas. L'écouter sur
+ * le bouton lui-même faisait tourner le repère tactile avec lui, et la
+ * rotation s'emballait.
  */
 
-/** Amplitude de l'arc, en degrés. */
+/** Amplitude de l'arc, en degrés, ouverture vers le bas. */
 const ARC_SPAN = 270;
 const ARC_START = -135;
 
-export type PowerDialProps = {
-  size: number;
-  ledSize?: number;
+/** Angle mesuré depuis midi, sens horaire. */
+const polar = (center: number, radius: number, angle: number) => {
+  const radians = ((angle - 90) * Math.PI) / 180;
+  return {
+    x: center + radius * Math.cos(radians),
+    y: center + radius * Math.sin(radians),
+  };
 };
 
-function PowerDialView({ size, ledSize = 14 }: PowerDialProps) {
-  const { level, brightness } = useStrip();
-  const knobSize = size * 0.62;
+const arcPath = (center: number, radius: number, from: number, to: number) => {
+  const start = polar(center, radius, from);
+  const end = polar(center, radius, to);
+  const largeArc = Math.abs(to - from) > 180 ? 1 : 0;
+  return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y}`;
+};
+
+export type PowerDialProps = {
+  size: number;
+};
+
+function PowerDialView({ size }: PowerDialProps) {
+  const { knob, level, brightness } = useStrip();
+
+  const center = size / 2;
+  const stroke = Math.max(size * 0.055, 6);
+  const radius = center - stroke;
+  const knobSize = size * 0.6;
 
   const panResponder = useMemo(
     () =>
@@ -33,69 +56,76 @@ function PowerDialView({ size, ledSize = 14 }: PowerDialProps) {
         onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: () => true,
         onPanResponderMove: (event) => {
-          // `locationX/Y` sont relatifs au bouton : son centre est à la moitié
-          // de sa taille, sans mesure asynchrone.
-          const half = knobSize / 2;
-          const dx = event.nativeEvent.locationX - half;
-          const dy = event.nativeEvent.locationY - half;
+          const dx = event.nativeEvent.locationX - center;
+          const dy = event.nativeEvent.locationY - center;
           if (dx === 0 && dy === 0) {
             return;
           }
-          // Angle ramené sur l'arc utile, puis converti en nombre de LED.
-          let angle = (Math.atan2(dy, dx) * 180) / Math.PI + 90;
-          if (angle > 180) {
-            angle -= 360;
-          }
+          // `atan2(dx, -dy)` donne l'angle depuis midi, positif dans le sens
+          // horaire — l'orientation de l'arc.
+          const angle = (Math.atan2(dx, -dy) * 180) / Math.PI;
           const ratio = (angle - ARC_START) / ARC_SPAN;
-          setLevel(Math.round(ratio * NEOPIXEL_COUNT));
+          // Le doigt qui passe dans l'ouverture basse se range au plus proche
+          // des deux extrémités plutôt que de faire sauter la valeur.
+          setKnob(Math.round(Math.min(Math.max(ratio, 0), 1) * NEOPIXEL_COUNT));
         },
       }),
-    [knobSize],
+    [center],
   );
 
-  const radius = size / 2 - ledSize / 2;
-  const opacity = Math.max(brightness, 0) / 255;
+  const track = arcPath(center, radius, ARC_START, ARC_START + ARC_SPAN);
+  const filledSpan = (ARC_SPAN * level) / NEOPIXEL_COUNT;
+  // Le bouton ne suit que la main de l'utilisateur : pendant une animation,
+  // seule la lumière bouge.
+  const knobAngle = ARC_START + (ARC_SPAN * knob) / NEOPIXEL_COUNT;
+  const fill = filledSpan > 0 ? arcPath(center, radius, ARC_START, ARC_START + filledSpan) : null;
+  const glow = toOpacity(brightness);
 
   return (
-    <View style={[styles.container, { width: size, height: size }]}>
-      {Array.from({ length: NEOPIXEL_COUNT }, (_, index) => {
-        const angle = ARC_START + (ARC_SPAN * index) / (NEOPIXEL_COUNT - 1);
-        const radians = ((angle - 90) * Math.PI) / 180;
-        const on = index < level;
-        return (
-          <View
-            key={index}
-            pointerEvents="none"
-            style={[
-              styles.led,
-              {
-                width: ledSize,
-                height: ledSize,
-                borderRadius: ledSize / 2,
-                backgroundColor: COLORS.strip,
-                opacity: on ? Math.max(opacity, 0.15) : 0.08,
-                transform: [
-                  { translateX: radius * Math.cos(radians) },
-                  { translateY: radius * Math.sin(radians) },
-                ],
-              },
-            ]}
-          />
-        );
-      })}
+    <View style={[styles.container, { width: size, height: size }]} {...panResponder.panHandlers}>
+      <Svg width={size} height={size} style={StyleSheet.absoluteFill}>
+        <Path
+          d={track}
+          stroke={COLORS.stripOff}
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          fill="none"
+        />
+        {fill !== null && (
+          <>
+            {/* Halo : un tracé large et translucide sous le trait net. */}
+            <Path
+              d={fill}
+              stroke={COLORS.strip}
+              strokeWidth={stroke * 2.4}
+              strokeOpacity={glow * 0.3}
+              strokeLinecap="round"
+              fill="none"
+            />
+            <Path
+              d={fill}
+              stroke={COLORS.strip}
+              strokeWidth={stroke}
+              strokeOpacity={glow}
+              strokeLinecap="round"
+              fill="none"
+            />
+          </>
+        )}
+      </Svg>
 
       <View
-        {...panResponder.panHandlers}
+        pointerEvents="none"
         style={[
           styles.knob,
           {
             width: knobSize,
             height: knobSize,
             borderRadius: knobSize / 2,
-            transform: [{ rotate: `${ARC_START + (ARC_SPAN * level) / NEOPIXEL_COUNT}deg` }],
+            transform: [{ rotate: `${knobAngle}deg` }],
           },
         ]}>
-        <View style={[styles.marker, { height: knobSize * 0.06 }]} />
+        <View style={[styles.slot, { height: Math.max(knobSize * 0.05, 3) }]} />
       </View>
     </View>
   );
@@ -103,19 +133,17 @@ function PowerDialView({ size, ledSize = 14 }: PowerDialProps) {
 
 const styles = StyleSheet.create({
   container: { justifyContent: 'center', alignItems: 'center' },
-  led: { position: 'absolute' },
   knob: {
     backgroundColor: COLORS.knob,
-    borderWidth: 8,
+    borderWidth: 6,
     borderColor: COLORS.knobRing,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  marker: {
-    width: '100%',
+  slot: {
+    width: '78%',
     backgroundColor: COLORS.knobRing,
-    position: 'absolute',
-    borderRadius: 2,
+    borderRadius: 3,
   },
 });
 

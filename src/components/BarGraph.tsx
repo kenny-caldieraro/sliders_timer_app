@@ -1,13 +1,18 @@
 import { memo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import Svg, { Rect } from 'react-native-svg';
 
 import { useChrome, useRow } from '../hardware/display';
-import type { Cell } from '../hardware/layout';
+import { columnMaskOf, type Cell } from '../hardware/layout';
 import { COLORS } from '../theme';
 
 /**
- * Bargraphe vertical de huit LED, câblé sur une ligne de matrice.
- * Un bit par LED : le bit 7 en haut, le bit 0 en bas.
+ * Bargraphe vertical de huit segments, câblé sur une ligne de matrice.
+ *
+ * Les colonnes suivent la convention de `LedControl` : la colonne 0 est le
+ * bit de poids fort, et se trouve en haut du bargraphe.
+ *
+ * Chaque segment allumé est doublé d'un halo translucide : sur la réplique
+ * ce sont des barres vertes derrière un diffuseur, pas des rectangles nets.
  */
 
 export type BarGraphProps = {
@@ -22,33 +27,47 @@ function BarGraphView({ cell, width, ledHeight, gap = 3 }: BarGraphProps) {
   const chrome = useChrome();
   const dimmed = chrome.off[cell.matrix];
 
+  const pitch = ledHeight + gap;
+  const height = pitch * 8;
+  const halo = Math.min(gap, 4);
+
   return (
-    <View style={styles.container}>
+    <Svg width={width + halo * 2} height={height}>
       {Array.from({ length: 8 }, (_, index) => {
-        const bit = 7 - index;
-        const on = !dimmed && (value & (1 << bit)) !== 0;
+        const on = !dimmed && (value & columnMaskOf(index)) !== 0;
+        const y = index * pitch;
+        return on ? (
+          <Rect
+            key={index}
+            x={0}
+            y={y}
+            width={width + halo * 2}
+            height={ledHeight + halo}
+            rx={3}
+            ry={3}
+            fill={COLORS.bar}
+            fillOpacity={0.28}
+          />
+        ) : null;
+      })}
+      {Array.from({ length: 8 }, (_, index) => {
+        const on = !dimmed && (value & columnMaskOf(index)) !== 0;
+        const y = index * pitch;
         return (
-          <View
-            key={bit}
-            style={[
-              styles.led,
-              {
-                width,
-                height: ledHeight,
-                marginVertical: gap / 2,
-                backgroundColor: on ? COLORS.bar : COLORS.barOff,
-              },
-            ]}
+          <Rect
+            key={index}
+            x={halo}
+            y={y + halo / 2}
+            width={width}
+            height={ledHeight}
+            rx={2}
+            ry={2}
+            fill={on ? COLORS.bar : COLORS.barOff}
           />
         );
       })}
-    </View>
+    </Svg>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { justifyContent: 'center', alignItems: 'center' },
-  led: { borderRadius: 2 },
-});
 
 export const BarGraph = memo(BarGraphView);

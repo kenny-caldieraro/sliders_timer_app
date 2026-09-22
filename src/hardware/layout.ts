@@ -61,6 +61,12 @@ export const STATUS_LEDS = [
 export const EDGE_ROW = { matrix: 1 as MatrixIndex, row: 6 };
 export const EDGE_PATTERN = 0x78;
 
+/**
+ * Masque d'une colonne, convention `LedControl` : la colonne 0 est le bit de
+ * poids fort. Ré-exporté ici pour les composants qui lisent une ligne brute.
+ */
+export const columnMaskOf = (column: number) => 0x80 >> column;
+
 /** LED de l'émetteur, allumées dans les dernières secondes. */
 export const EMITTER_ROW = { matrix: 1 as MatrixIndex, row: 7 };
 export const EMITTER_COLUMNS = [1, 2, 3, 4] as const;
