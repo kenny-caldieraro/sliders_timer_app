@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import {
   BARGRAPH_END,
   BARGRAPH_NORMAL,
+  BARGRAPH_OFF,
   BARGRAPH_POST_END,
   type BargraphFrame,
 } from '../animations/frames';
@@ -232,8 +233,10 @@ export function useDeadState(state: TimerState) {
       setStatusLed('TAU', false);
       setStatusLed('DELTA', false);
       setStatusLed('ZETA', false);
-      setRow(BARGRAPH_LEFT.matrix, BARGRAPH_LEFT.row, 0);
-      setRow(BARGRAPH_RIGHT.matrix, BARGRAPH_RIGHT.row, 0);
+      // `animation_29` éteint les bargraphes par la table dédiée.
+      const [offLeft, offRight] = BARGRAPH_OFF.frames[0] as BargraphFrame;
+      setRow(BARGRAPH_LEFT.matrix, BARGRAPH_LEFT.row, reverseBits(offLeft));
+      setRow(BARGRAPH_RIGHT.matrix, BARGRAPH_RIGHT.row, reverseBits(offRight));
 
       await playWormholeOpening(token);
       playClip('activation');
@@ -462,7 +465,11 @@ export function useColonBlink(state: TimerState) {
 
 /**
  * Table de bargraphe correspondant au moment du décompte.
- * Le décompte normal garde la même ; le burnout en change à chaque palier.
+ *
+ * Reprend les seuils de `animation_burnout` : sous trente secondes la table
+ * de fin, entre trente et cinquante-neuf celle d'après-fin, au-delà la table
+ * normale. Le décompte ordinaire garde la table d'après-fin du bout à
+ * l'autre, comme `animation_normal`.
  */
 function bargraphTableFor(state: TimerState) {
   if (state.phase !== 'burnout') {

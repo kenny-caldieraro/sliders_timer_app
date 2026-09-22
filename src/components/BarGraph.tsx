@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
+import Svg, { ClipPath, Defs, G, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { useChrome, useRow } from '../hardware/display';
 import { columnMaskOf, type Cell } from '../hardware/layout';
@@ -33,6 +33,7 @@ function BarGraphView({ cell, width, ledHeight, gap = 4 }: BarGraphProps) {
   const height = innerHeight + padding * 2;
   const totalWidth = width + padding * 2;
   const gradientId = `bar-${cell.matrix}-${cell.row}`;
+  const clipId = `barclip-${cell.matrix}-${cell.row}`;
 
   return (
     <Svg width={totalWidth} height={height}>
@@ -42,6 +43,14 @@ function BarGraphView({ cell, width, ledHeight, gap = 4 }: BarGraphProps) {
           <Stop offset="0.35" stopColor={COLORS.barChannel} />
           <Stop offset="1" stopColor="#101010" />
         </LinearGradient>
+        {/*
+          Le halo déborde volontairement du segment. Sans découpe il dépassait
+          les angles arrondis de la gouttière : le coin supérieur gauche
+          paraissait mal allumé.
+        */}
+        <ClipPath id={clipId}>
+          <Rect x={0} y={0} width={totalWidth} height={height} rx={5} ry={5} />
+        </ClipPath>
       </Defs>
 
       {/* Gouttière */}
@@ -57,9 +66,10 @@ function BarGraphView({ cell, width, ledHeight, gap = 4 }: BarGraphProps) {
 
       {/*
         Halo : un segment allumé diffuse dans le diffuseur, il ne s'arrête pas
-        net au bord. Deux passes translucides plus larges que le segment
-        suffisent à le rendre, sans le coût d'un filtre.
+        net au bord. Une passe translucide plus large que le segment suffit à
+        le rendre, sans le coût d'un filtre.
       */}
+      <G clipPath={`url(#${clipId})`}>
       {Array.from({ length: 8 }, (_, index) => {
         const on = !dimmed && (value & columnMaskOf(index)) !== 0;
         if (!on) {
@@ -80,6 +90,7 @@ function BarGraphView({ cell, width, ledHeight, gap = 4 }: BarGraphProps) {
           />
         );
       })}
+      </G>
 
       {Array.from({ length: 8 }, (_, index) => {
         const on = !dimmed && (value & columnMaskOf(index)) !== 0;

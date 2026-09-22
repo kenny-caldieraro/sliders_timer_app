@@ -89,12 +89,21 @@ export function playClip(name: ClipName) {
     return;
   }
   try {
-    // On ne rembobine que si le lecteur a déjà servi : un `seekTo` sur un
-    // lecteur qui n'a pas fini de charger échoue silencieusement.
-    if (player.currentTime > 0) {
-      player.seekTo(0).catch((error) => report(`rembobinage de « ${name} »`, error));
-    }
-    player.play();
+    // Le rembobinage est asynchrone : lancer la lecture sans l'attendre
+    // laissait le lecteur à la fin du clip, et rien ne sortait à la
+    // deuxième ouverture.
+    player
+      .seekTo(0)
+      .then(() => player.play())
+      .catch((error) => {
+        report(`rembobinage de « ${name} »`, error);
+        // Le rembobinage a échoué : on tente quand même la lecture.
+        try {
+          player.play();
+        } catch {
+          delete players[name];
+        }
+      });
   } catch (error) {
     report(`lecture de « ${name} »`, error);
     delete players[name];
