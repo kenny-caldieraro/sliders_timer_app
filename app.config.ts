@@ -16,6 +16,7 @@ const ANDROID_PACKAGE = 'com.sliderstimer';
 const IOS_BUNDLE_ID = 'com.webplayground.slidersreplica';
 const VERSION = '2.0.0';
 const ANDROID_VERSION_CODE = 5;
+const IOS_BUILD_NUMBER = 6;
 
 const config: ExpoConfig = {
   name: 'Sliders Timer',
@@ -31,7 +32,7 @@ const config: ExpoConfig = {
 
   ios: {
     bundleIdentifier: IOS_BUNDLE_ID,
-    buildNumber: String(ANDROID_VERSION_CODE),
+    buildNumber: String(IOS_BUILD_NUMBER),
     supportsTablet: false,
     infoPlist: {
       UIViewControllerBasedStatusBarAppearance: false,
@@ -98,10 +99,15 @@ const config: ExpoConfig = {
         enableBackgroundPlayback: false,
         enableBackgroundRecording: false,
         recordAudioAndroid: false,
-        // `false` supprime la clé plutôt que d'en écrire une par défaut :
-        // une justification d'accès au micro qu'on n'utilise pas est une
-        // question de plus au moment de la relecture.
-        microphonePermission: false,
+        /*
+         * La chaîne de justification est obligatoire même si l'application
+         * n'enregistre rien. Apple analyse les API référencées par les
+         * bibliothèques liées, pas leur usage réel : `expo-audio` référence
+         * les API micro, et une soumission sans cette clé est rejetée
+         * (erreur 90683).
+         */
+        microphonePermission:
+          "Cette application n'enregistre aucun son. Cette autorisation provient de la bibliothèque audio qui génère les bips du minuteur, et ne sera jamais demandée.",
       },
     ],
     [
