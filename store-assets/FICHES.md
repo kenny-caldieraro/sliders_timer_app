@@ -25,49 +25,59 @@ Sliders Timer
 ### Description courte — 80 caractères maximum
 
 ```
-Réplique du minuteur de Sliders : compte à rebours, animations et vortex.
+Le minuteur de Sliders dans votre poche. Chaque LED, chaque bip, à l'identique.
 ```
 
 ### Description complète — 4 000 caractères maximum
 
 ```
-Sliders Timer est une réplique du minuteur de la série Sliders, reproduit
-jusque dans sa logique d'affichage.
+Vous connaissez ce son. Les bips qui s'accélèrent, les témoins qui passent au
+rouge, et le vortex qui s'ouvre à la dernière seconde.
 
-L'application n'imite pas l'objet de loin. Elle simule les deux matrices de
-LED qui pilotent la façade d'origine, et rejoue les séquences d'animation
+Sliders Timer met ce minuteur dans votre poche.
+
+Réglez le compte à rebours. Appuyez sur END. Regardez l'objet s'animer comme
+vous l'avez vu faire à l'écran.
+
+
+CE N'EST PAS UN DESSIN
+
+Les animations ne sont pas approximées : elles viennent du programme d'une
+réplique physique construite autour d'un Arduino, et elles sont rejouées
 image par image, avec leurs fréquences et leurs durées d'origine.
 
-
-CE QUE VOUS POUVEZ FAIRE
-
-• Régler un compte à rebours, de la seconde au jour, jusqu'à 999 jours
-• Lancer le saut et regarder le vortex s'ouvrir
-• Forcer un saut anticipé, qui relance le décompte sur une durée tirée au sort
-• Basculer en mode burnout : quatre-vingt-dix secondes de sursis, avec ses
-  cinq paliers sonores et ses témoins qui passent au fixe l'un après l'autre
-• Rattraper le coup à la toute dernière seconde — ou laisser le minuteur mourir
-• Tourner la molette pour régler l'arc lumineux
-• Être prévenu quand le décompte atteint zéro, même application fermée
+Les quatre témoins latéraux clignotent à quatre cadences différentes, comme
+sur l'objet. C'est ce décalage, et pas un effet aléatoire, qui lui donne son
+rythme. Les bips du décompte passent par cinq régimes de plus en plus
+pressants. L'arc rouge respire d'autant plus vite que le temps s'épuise.
 
 
-CE QUI VIENT DE L'OBJET
+LE SAUT, ET CE QUI PEUT MAL TOURNER
 
-Les animations, les cadences de clignotement et les motifs sonores sont repris
-du programme d'une réplique matérielle construite autour d'un Arduino. Les
-témoins ne clignotent pas au hasard : leurs quatre périodes sont celles de
-l'objet, et c'est leur décalage qui lui donne son rythme.
+Lancez un décompte jusqu'à 999 jours, ou forcez le saut quand bon vous
+semble.
 
-La séquence d'allumage, les huit écrans de brouillage, l'effet de balayage,
-l'ouverture du vortex et le tracé de fin de burnout sont tous à leur place.
+Mais vous pouvez aussi déclencher le burnout : quatre-vingt-dix secondes de
+sursis, et pas une de plus. Les paliers sonores s'enchaînent, les témoins se
+figent l'un après l'autre. À la toute dernière seconde, un appui bien placé
+vous sort d'affaire. Sinon le vortex s'ouvre pour de bon, et le minuteur
+meurt.
 
 
-SOBRIÉTÉ
+CE QU'IL Y A DEDANS
 
-L'application ne collecte aucune donnée, ne contient aucune publicité, ne
-propose aucun achat, et fonctionne entièrement hors ligne. Elle ne demande
-que l'autorisation d'afficher une notification, et seulement au moment où
-vous lancez votre premier décompte.
+• Un compte à rebours réglable à la seconde, jusqu'à 999 jours
+• Le saut, le saut anticipé et le mode burnout
+• La séquence d'allumage complète, écran par écran
+• Une molette qui se tourne au doigt
+• Une notification quand le décompte atteint zéro, même application fermée
+• Une notice intégrée, parce que PWR, FCN et END ne parlent pas d'eux-mêmes
+
+
+SANS RIEN D'AUTRE
+
+Aucune publicité, aucun achat, aucun compte, aucune donnée collectée. Tout
+fonctionne hors ligne.
 
 
 HOMMAGE DE FAN
@@ -96,54 +106,66 @@ Réplique du minuteur
 ### Texte promotionnel — 170 caractères maximum
 
 ```
-Les animations, les cadences de LED et les paliers sonores sont repris du
-programme d'une réplique matérielle. Rien n'est approximé.
+Les animations viennent du programme d'une réplique physique, rejouées image par image. Les témoins clignotent aux cadences de l'objet.
 ```
 
 ### Description — 4 000 caractères maximum
 
 ```
-Sliders Timer est une réplique du minuteur de la série Sliders, reproduit
-jusque dans sa logique d'affichage.
+Vous connaissez ce son. Les bips qui s'accélèrent, les témoins qui passent au
+rouge, et le vortex qui s'ouvre à la dernière seconde.
 
-L'application n'imite pas l'objet de loin. Elle simule les deux matrices de
-LED qui pilotent la façade d'origine, et rejoue les séquences d'animation
+Sliders Timer met ce minuteur dans votre poche.
+
+Réglez le compte à rebours. Appuyez sur END. Regardez l'objet s'animer comme
+vous l'avez vu faire à l'écran.
+
+
+CE N'EST PAS UN DESSIN
+
+Les animations ne sont pas approximées : elles viennent du programme d'une
+réplique physique construite autour d'un Arduino, et elles sont rejouées
 image par image, avec leurs fréquences et leurs durées d'origine.
 
-
-CE QUE VOUS POUVEZ FAIRE
-
-• Régler un compte à rebours, de la seconde au jour, jusqu'à 999 jours
-• Lancer le saut et regarder le vortex s'ouvrir
-• Forcer un saut anticipé, qui relance le décompte sur une durée tirée au sort
-• Basculer en mode burnout : quatre-vingt-dix secondes de sursis, avec ses
-  cinq paliers sonores et ses témoins qui passent au fixe l'un après l'autre
-• Rattraper le coup à la toute dernière seconde — ou laisser le minuteur mourir
-• Tourner la molette pour régler l'arc lumineux
-• Être prévenu quand le décompte atteint zéro, même application fermée
+Les quatre témoins latéraux clignotent à quatre cadences différentes, comme
+sur l'objet. C'est ce décalage, et pas un effet aléatoire, qui lui donne son
+rythme. Les bips du décompte passent par cinq régimes de plus en plus
+pressants. L'arc rouge respire d'autant plus vite que le temps s'épuise.
 
 
-CE QUI VIENT DE L'OBJET
+LE SAUT, ET CE QUI PEUT MAL TOURNER
 
-Les animations, les cadences de clignotement et les motifs sonores sont repris
-du programme d'une réplique matérielle construite autour d'un Arduino. Les
-témoins ne clignotent pas au hasard : leurs quatre périodes sont celles de
-l'objet, et c'est leur décalage qui lui donne son rythme.
+Lancez un décompte jusqu'à 999 jours, ou forcez le saut quand bon vous
+semble.
 
-La séquence d'allumage, les huit écrans de brouillage, l'effet de balayage,
-l'ouverture du vortex et le tracé de fin de burnout sont tous à leur place.
+Mais vous pouvez aussi déclencher le burnout : quatre-vingt-dix secondes de
+sursis, et pas une de plus. Les paliers sonores s'enchaînent, les témoins se
+figent l'un après l'autre. À la toute dernière seconde, un appui bien placé
+vous sort d'affaire. Sinon le vortex s'ouvre pour de bon, et le minuteur
+meurt.
 
 
-SOBRIÉTÉ
+CE QU'IL Y A DEDANS
 
-Aucune donnée collectée, aucune publicité, aucun achat, aucun compte. Tout
+• Un compte à rebours réglable à la seconde, jusqu'à 999 jours
+• Le saut, le saut anticipé et le mode burnout
+• La séquence d'allumage complète, écran par écran
+• Une molette qui se tourne au doigt
+• Une notification quand le décompte atteint zéro, même application fermée
+• Une notice intégrée, parce que PWR, FCN et END ne parlent pas d'eux-mêmes
+
+
+SANS RIEN D'AUTRE
+
+Aucune publicité, aucun achat, aucun compte, aucune donnée collectée. Tout
 fonctionne hors ligne.
 
 
 HOMMAGE DE FAN
 
 Ce projet est un hommage sans affiliation ni licence officielle. Sliders est
-une marque de ses ayants droit.
+une marque de ses ayants droit. Aucun lien avec les producteurs ou les
+diffuseurs de la série.
 ```
 
 ### Mots-clés — 100 caractères maximum, séparés par des virgules, sans espaces
